@@ -1,10 +1,8 @@
 {
-  "name": "eventsphere-backend",
-  "version": "4.0.0",
-  "main": "server.js",
+  "name": "eventsphere",
+  "version": "1.0.0",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "node backend/server.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -20,5 +18,7 @@
     "qrcode": "^1.5.3",
     "razorpay": "^2.9.2"
   },
-  "description": "EventSphere - Full Stack College Event Management Platform"
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }
