@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Registration Successful – EventSphere</title>
+  <link rel="manifest" href="manifest.json"/>
+  <meta name="theme-color" content="#F5A623"/>
+  <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});</script>
+  <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--orange:#F5A623;--orange-dark:#E09400;--orange-light:#FFF3DC;--text-dark:#1A1A2E;--text-mid:#555;--text-light:#999;--bg:#F9F9F9;--bg-white:#FFFFFF;--border:#E8E8E8;--radius:16px;--tr:0.25s ease;}
+    [data-theme="dark"]{--text-dark:#F0F0F0;--text-mid:#CCC;--text-light:#888;--bg:#0F0F0F;--bg-white:#1C1C1C;--border:#2E2E2E;--orange-light:#3a2200;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text-dark);min-height:100vh;display:flex;flex-direction:column;}
+    nav{background:var(--bg-white);border-bottom:1px solid var(--border);padding:0 48px;height:64px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(0,0,0,0.04);}
+    .nav-logo{display:flex;align-items:center;gap:8px;text-decoration:none;font-family:'Clash Display',sans-serif;font-weight:700;font-size:20px;color:var(--text-dark);}
+    .nav-logo svg{color:var(--orange);}
+    .dark-btn{background:none;border:none;cursor:pointer;color:var(--text-mid);padding:6px;border-radius:50%;display:flex;align-items:center;}
+    main{flex:1;padding:48px 24px;position:relative;overflow:hidden;}
+    /* Confetti */
+    .confetti-wrap{position:fixed;inset:0;pointer-events:none;z-index:0;}
+    .dot{position:absolute;width:8px;height:8px;border-radius:2px;animation:fall linear infinite;}
+    @keyframes fall{0%{transform:translateY(-20px) rotate(0deg);opacity:1;}100%{transform:translateY(105vh) rotate(720deg);opacity:0;}}
+    .page-content{position:relative;z-index:1;max-width:540px;margin:0 auto;}
+    /* Success header */
+    .success-top{text-align:center;margin-bottom:32px;animation:popIn 0.6s cubic-bezier(0.34,1.56,0.64,1) both;}
+    @keyframes popIn{from{transform:scale(0.5);opacity:0;}to{transform:scale(1);opacity:1;}}
+    .check-ring{width:88px;height:88px;background:#E8F8EE;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;border:3px solid #27AE60;}
+    .check-ring svg{color:#27AE60;}
+    .success-top h1{font-family:'Clash Display',sans-serif;font-size:32px;font-weight:700;margin-bottom:8px;}
+    .success-top p{font-size:15px;color:var(--text-mid);}
+    /* Ticket Card */
+    .ticket{background:var(--bg-white);border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,0.12);overflow:hidden;margin-bottom:24px;animation:slideUp 0.5s 0.2s ease both;}
+    @keyframes slideUp{from{transform:translateY(24px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+    .ticket-header{background:linear-gradient(135deg,#F5A623,#E09400);padding:22px 28px;position:relative;}
+    .ticket-header::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:20px;background:var(--bg-white);border-radius:20px 20px 0 0;}
+    .ticket-logo{font-family:'Clash Display',sans-serif;font-weight:700;font-size:18px;color:#fff;display:flex;align-items:center;gap:8px;}
+    .ticket-tag{font-size:11px;color:rgba(255,255,255,0.8);margin-top:2px;letter-spacing:1px;text-transform:uppercase;}
+    .ticket-body{padding:24px 28px;}
+    .ticket-event{font-family:'Clash Display',sans-serif;font-size:20px;font-weight:700;color:var(--text-dark);margin-bottom:6px;line-height:1.3;}
+    .ticket-meta{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0;padding:18px;background:var(--bg);border-radius:12px;}
+    .meta-item{}
+    .meta-label{font-size:10.5px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text-light);margin-bottom:3px;}
+    .meta-val{font-size:13.5px;font-weight:600;color:var(--text-dark);}
+    .booking-id{font-family:'Clash Display',sans-serif;font-size:18px;font-weight:700;color:var(--orange);}
+    /* Tear line */
+    .tear{display:flex;align-items:center;gap:0;margin:0 -28px;position:relative;}
+    .tear-circle{width:22px;height:22px;background:var(--bg);border-radius:50%;flex-shrink:0;}
+    .tear-line{flex:1;border-top:2px dashed var(--border);}
+    /* QR section */
+    .qr-section{padding:24px 28px;text-align:center;}
+    .qr-section h3{font-size:14px;font-weight:700;color:var(--text-dark);margin-bottom:14px;}
+    #qrImg{width:160px;height:160px;border:3px solid var(--orange);border-radius:12px;padding:6px;background:white;}
+    .qr-hint{font-size:12px;color:var(--text-light);margin-top:8px;}
+    .qr-loading{width:160px;height:160px;background:var(--bg);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto;color:var(--text-light);font-size:13px;}
+    /* Actions */
+    .actions{display:flex;gap:12px;flex-wrap:wrap;}
+    .btn-primary{flex:1;min-width:140px;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--orange);color:#fff;border:none;border-radius:12px;padding:13px 20px;font-size:14.5px;font-weight:700;font-family:inherit;cursor:pointer;text-decoration:none;box-shadow:0 4px 16px rgba(245,166,35,0.3);transition:all var(--tr);}
+    .btn-primary:hover{background:var(--orange-dark);transform:translateY(-1px);}
+    .btn-secondary{flex:1;min-width:140px;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--bg-white);color:var(--text-dark);border:1.5px solid var(--border);border-radius:12px;padding:12px 20px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;text-decoration:none;transition:all var(--tr);}
+    .btn-secondary:hover{border-color:var(--orange);color:var(--orange);}
+    .btn-download{width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--orange-light);color:var(--orange);border:1.5px solid var(--orange);border-radius:12px;padding:12px 20px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:12px;transition:all var(--tr);}
+    .btn-download:hover{background:var(--orange);color:#fff;}
+    /* Email notice */
+    .email-notice{background:linear-gradient(135deg,#EBF4FF,#DBEAFE);border:1.5px solid #BFDBFE;border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;font-size:13.5px;color:#1e40af;animation:slideUp 0.5s 0.35s ease both;}
+    [data-theme="dark"] .email-notice{background:#1e3a5f;border-color:#2563eb;color:#93c5fd;}
+    footer{background:var(--bg-white);border-top:1px solid var(--border);padding:20px 48px;display:flex;align-items:center;justify-content:space-between;}
+    .footer-logo{display:flex;align-items:center;gap:8px;font-family:'Clash Display',sans-serif;font-weight:700;font-size:16px;color:var(--text-dark);text-decoration:none;}
+    .footer-logo svg{color:var(--orange);}
+    .footer-copy{font-size:12.5px;color:var(--text-light);}
+    @media(max-width:600px){nav{padding:0 20px;}main{padding:28px 16px;}.ticket-body,.qr-section{padding:18px 20px;}.ticket-meta{grid-template-columns:1fr;}.actions{flex-direction:column;}footer{flex-direction:column;gap:10px;padding:16px;text-align:center;}}
+  </style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+    EventSphere
+  </a>
+  <button class="dark-btn" id="darkBtn">
+    <svg id="darkIco" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+</nav>
+
+<div class="confetti-wrap" id="confetti"></div>
+
+<main>
+  <div class="page-content">
+    <div class="success-top">
+      <div class="check-ring">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h1>You're In! 🎉</h1>
+      <p>Your registration is confirmed. Check your email for details.</p>
+    </div>
+
+    <!-- Email notice -->
+    <div class="email-notice">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      <span>A confirmation email with your QR ticket has been sent to your inbox.</span>
+    </div>
+
+    <!-- Ticket -->
+    <div class="ticket">
+      <div class="ticket-header">
+        <div class="ticket-logo">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          EventSphere
+        </div>
+        <div class="ticket-tag">Event Ticket</div>
+      </div>
+      <div class="ticket-body">
+        <div class="ticket-event" id="ticketEvent">Loading…</div>
+        <div class="ticket-meta">
+          <div class="meta-item"><div class="meta-label">📅 Date</div><div class="meta-val" id="ticketDate">—</div></div>
+          <div class="meta-item"><div class="meta-label">⏰ Time</div><div class="meta-val" id="ticketTime">—</div></div>
+          <div class="meta-item"><div class="meta-label">📍 Venue</div><div class="meta-val" id="ticketVenue">—</div></div>
+          <div class="meta-item"><div class="meta-label">🏙️ City</div><div class="meta-val" id="ticketCity">—</div></div>
+          <div class="meta-item"><div class="meta-label">👤 Name</div><div class="meta-val" id="ticketName">—</div></div>
+          <div class="meta-item"><div class="meta-label">🎫 Booking ID</div><div class="booking-id" id="ticketBooking">—</div></div>
+        </div>
+      </div>
+      <div class="tear"><div class="tear-circle"></div><div class="tear-line"></div><div class="tear-circle"></div></div>
+      <div class="qr-section">
+        <h3>🔳 Entry QR Code — Show at Entrance</h3>
+        <div id="qrContainer"><div class="qr-loading">Generating QR…</div></div>
+        <div class="qr-hint">Valid only for registered attendee</div>
+        <button class="btn-download" onclick="downloadTicket()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download Ticket
+        </button>
+      </div>
+    </div>
+
+    <div class="actions">
+      <a href="dashboard.html" class="btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        My Dashboard
+      </a>
+      <a href="events.html" class="btn-secondary">Browse More Events</a>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <a href="index.html" class="footer-logo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>EventSphere</a>
+  <p class="footer-copy">© 2026 EventSphere</p>
+</footer>
+
+<script>
+// Dark mode
+var html=document.documentElement,dico=document.getElementById('darkIco');
+var sunS='<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+var monS='<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+if(localStorage.getItem('theme')==='dark'){html.setAttribute('data-theme','dark');dico.innerHTML=sunS;}
+document.getElementById('darkBtn').addEventListener('click',function(){var d=html.getAttribute('data-theme')==='dark';d?html.removeAttribute('data-theme'):html.setAttribute('data-theme','dark');dico.innerHTML=d?monS:sunS;localStorage.setItem('theme',d?'light':'dark');});
+
+// Confetti
+(function(){
+  var colors=['#F5A623','#27AE60','#3B82F6','#8B5CF6','#EF4444','#F59E0B'];
+  var wrap=document.getElementById('confetti');
+  for(var i=0;i<40;i++){
+    var d=document.createElement('div');
+    d.className='dot';
+    d.style.cssText='left:'+Math.random()*100+'%;animation-duration:'+(2+Math.random()*3)+'s;animation-delay:'+(-Math.random()*3)+'s;background:'+colors[Math.floor(Math.random()*colors.length)]+';width:'+(6+Math.random()*8)+'px;height:'+(6+Math.random()*8)+'px;';
+    wrap.appendChild(d);
+  }
+  setTimeout(function(){wrap.style.display='none';},6000);
+})();
+
+// Load ticket data
+var BURL=localStorage.getItem('backendURL')||(window.location.port==='5000'||window.location.port==='3000'?'':'http://localhost:5000');
+var regData=JSON.parse(sessionStorage.getItem('lastRegistration')||'null');
+var user=JSON.parse(localStorage.getItem('user')||'null');
+var qrGlobal=null;
+
+function fd(d){if(!d)return'—';return new Date(d).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});}
+function ft(d){if(!d)return'—';return new Date(d).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});}
+
+function renderTicket(data){
+  document.getElementById('ticketEvent').textContent=data.event_title||'—';
+  document.getElementById('ticketDate').textContent=fd(data.event_date||data.date);
+  document.getElementById('ticketTime').textContent=ft(data.event_date||data.date);
+  document.getElementById('ticketVenue').textContent=data.venue||'—';
+  document.getElementById('ticketCity').textContent=data.city||'—';
+  document.getElementById('ticketName').textContent=(user&&user.name)||'—';
+  document.getElementById('ticketBooking').textContent=data.booking_id||('ES-'+String(data.registration_id||'000000').padStart(6,'0'));
+
+  // Show QR
+  var qrContainer=document.getElementById('qrContainer');
+  if(data.qr_code){
+    qrGlobal=data.qr_code;
+    qrContainer.innerHTML='<img id="qrImg" src="'+data.qr_code+'" alt="QR Code"/>';
+  } else if(data.registration_id){
+    // Fetch QR from backend
+    fetch(BURL+'/api/registrations/qr/'+data.registration_id,{headers:{'Authorization':'Bearer '+(localStorage.getItem('token')||'')}})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(d){
+        if(d&&d.qr_code){qrGlobal=d.qr_code;qrContainer.innerHTML='<img id="qrImg" src="'+d.qr_code+'" alt="QR Code"/>';}
+        else{qrContainer.innerHTML='<div class="qr-loading" style="font-size:11px">QR unavailable<br>(install npm packages)</div>';}
+      }).catch(function(){qrContainer.innerHTML='<div class="qr-loading">QR unavailable</div>';});
+  } else {
+    qrContainer.innerHTML='<div class="qr-loading">QR unavailable</div>';
+  }
+}
+
+if(regData){
+  renderTicket(regData);
+} else {
+  // Try to load from last registration in localStorage
+  var lastReg=JSON.parse(localStorage.getItem('lastRegData')||'null');
+  if(lastReg) renderTicket(lastReg);
+  else{
+    document.getElementById('ticketEvent').textContent='Registration Confirmed';
+    document.getElementById('ticketDate').textContent='See your dashboard for details';
+    document.getElementById('qrContainer').innerHTML='<div class="qr-loading">Visit dashboard for QR</div>';
+  }
+}
+
+// Download ticket as image
+function downloadTicket(){
+  if(!qrGlobal){alert('QR not available yet. Try from your Dashboard.');return;}
+  var canvas=document.createElement('canvas');
+  canvas.width=540;canvas.height=700;
+  var ctx=canvas.getContext('2d');
+  // Background
+  ctx.fillStyle='#fff';ctx.roundRect(0,0,540,700,20);ctx.fill();
+  // Header gradient
+  var grad=ctx.createLinearGradient(0,0,540,120);
+  grad.addColorStop(0,'#F5A623');grad.addColorStop(1,'#E09400');
+  ctx.fillStyle=grad;ctx.roundRect(0,0,540,100,{upperLeft:20,upperRight:20,lowerLeft:0,lowerRight:0});ctx.fill();
+  // Title text
+  ctx.fillStyle='#fff';ctx.font='bold 22px sans-serif';ctx.fillText('🎟️ EventSphere Ticket',36,50);
+  // Event name
+  ctx.fillStyle='#1A1A2E';ctx.font='bold 20px sans-serif';
+  var evName=document.getElementById('ticketEvent').textContent;
+  ctx.fillText(evName.substring(0,35),36,140);
+  // Details
+  ctx.font='14px sans-serif';ctx.fillStyle='#555';
+  var details=[
+    '📅 '+document.getElementById('ticketDate').textContent+' '+document.getElementById('ticketTime').textContent,
+    '📍 '+document.getElementById('ticketVenue').textContent+', '+document.getElementById('ticketCity').textContent,
+    '👤 '+document.getElementById('ticketName').textContent,
+    '🎫 '+document.getElementById('ticketBooking').textContent
+  ];
+  details.forEach(function(t,i){ctx.fillText(t,36,175+i*28);});
+  // QR
+  var qrImg=new Image();
+  qrImg.onload=function(){
+    ctx.drawImage(qrImg,170,310,200,200);
+    ctx.fillStyle='#888';ctx.font='12px sans-serif';ctx.textAlign='center';
+    ctx.fillText('Show this QR code at the event entrance',270,530);
+    var link=document.createElement('a');
+    link.download='EventSphere-Ticket.png';
+    link.href=canvas.toDataURL('image/png');
+    link.click();
+  };
+  qrImg.src=qrGlobal;
+}
+
+// Store for dashboard access
+if(regData) localStorage.setItem('lastRegData', JSON.stringify(regData));
+</script>
+</body>
+</html>

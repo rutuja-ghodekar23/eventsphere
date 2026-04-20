@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login – EventSphere</title>
+  <link rel="manifest" href="manifest.json"/>
+  <meta name="theme-color" content="#F5A623"/>
+  <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});</script>
+  <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --orange: #F5A623;
+      --orange-dark: #E09400;
+      --text-dark: #1A1A2E;
+      --text-mid: #555;
+      --text-light: #999;
+      --bg: #F2F4F7;
+      --bg-white: #FFFFFF;
+      --border: #E2E6EA;
+      --border-focus: #F5A623;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --shadow: 0 8px 40px rgba(0,0,0,0.08);
+      --transition: 0.22s cubic-bezier(0.4,0,0.2,1);
+    }
+    [data-theme="dark"] {
+      --text-dark: #F0F0F0; --text-mid: #BBBBBB; --text-light: #888;
+      --bg: #0F0F0F; --bg-white: #1C1C1C; --border: #2E2E2E;
+      --shadow: 0 8px 40px rgba(0,0,0,0.4);
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg); color: var(--text-dark);
+      min-height: 100vh; display: flex; flex-direction: column;
+      transition: background var(--transition), color var(--transition);
+    }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--bg-white); border-bottom: 1px solid var(--border);
+      padding: 0 48px; height: 64px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .nav-logo { display:flex; align-items:center; gap:8px; text-decoration:none; font-family:'Clash Display',sans-serif; font-weight:700; font-size:20px; color:var(--text-dark); }
+    .nav-logo svg { color: var(--orange); }
+    .nav-links { display:flex; align-items:center; gap:36px; list-style:none; }
+    .nav-links a { text-decoration:none; font-size:14.5px; font-weight:500; color:var(--text-mid); transition:color var(--transition); }
+    .nav-links a:hover { color:var(--orange); }
+    .nav-right { display:flex; align-items:center; gap:16px; }
+    .dark-toggle { background:none; border:none; cursor:pointer; color:var(--text-mid); padding:6px; border-radius:50%; display:flex; align-items:center; transition:color var(--transition); }
+    .dark-toggle:hover { color:var(--orange); }
+    .btn-login-nav { background:none; border:none; cursor:pointer; font-size:14.5px; font-weight:500; color:var(--text-dark); font-family:'Plus Jakarta Sans',sans-serif; transition:color var(--transition); }
+    .btn-login-nav:hover { color:var(--orange); }
+    .btn-signup-nav { background:var(--orange); color:#fff; border:none; border-radius:var(--radius-sm); padding:9px 22px; font-size:14px; font-weight:600; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif; box-shadow:0 4px 16px rgba(245,166,35,0.3); transition:background var(--transition),transform var(--transition); }
+    .btn-signup-nav:hover { background:var(--orange-dark); transform:translateY(-1px); }
+
+    /* MAIN */
+    main { flex:1; display:flex; align-items:center; justify-content:center; padding:48px 24px; }
+
+    /* CARD */
+    .form-card {
+      background: var(--bg-white); border-radius: var(--radius);
+      box-shadow: var(--shadow); padding: 44px 44px 40px;
+      width: 100%; max-width: 480px;
+      animation: fadeUp 0.6s ease both;
+      transition: background var(--transition);
+    }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+
+    .form-card h1 {
+      font-family: 'Clash Display', sans-serif;
+      font-size: 28px; font-weight: 700; color: var(--text-dark);
+      text-align: center; margin-bottom: 6px; letter-spacing: -0.3px;
+    }
+    .subtitle { font-size: 14px; color: var(--text-light); text-align: center; margin-bottom: 26px; }
+
+    /* DEMO HINT */
+    .demo-hint {
+      background: #EBF4FF;
+      border: 1.5px solid #BFDBFE;
+      border-radius: var(--radius-sm);
+      padding: 13px 16px;
+      margin-bottom: 26px;
+      font-size: 13.5px;
+      color: #1D4ED8;
+      line-height: 1.5;
+      transition: background var(--transition);
+    }
+    [data-theme="dark"] .demo-hint { background: #1a2a3e; border-color: #2a4a6e; color: #93C5FD; }
+    .demo-hint strong { font-weight: 700; }
+    .demo-hint .demo-fill {
+      display: inline-block; margin-left: 6px;
+      background: rgba(29,78,216,0.1); border-radius: 6px;
+      padding: 1px 8px; font-size: 12px; font-weight: 600;
+      cursor: pointer; transition: background var(--transition);
+    }
+    .demo-hint .demo-fill:hover { background: rgba(29,78,216,0.2); }
+
+    /* FIELDS */
+    .field { margin-bottom: 20px; }
+    .field label { display:block; font-size:13.5px; font-weight:600; color:var(--text-dark); margin-bottom:7px; }
+    .input-wrap { position:relative; display:flex; align-items:center; }
+    .input-icon { position:absolute; left:14px; color:#BBBBBB; pointer-events:none; display:flex; align-items:center; }
+    .input-wrap input {
+      width:100%; padding:11px 14px 11px 40px;
+      border:1.5px solid var(--border); border-radius:var(--radius-sm);
+      font-size:14.5px; font-family:'Plus Jakarta Sans',sans-serif;
+      color:var(--text-dark); background:var(--bg-white); outline:none;
+      transition:border-color var(--transition),box-shadow var(--transition),background var(--transition);
+    }
+    .input-wrap input::placeholder { color:var(--text-light); }
+    .input-wrap input:focus { border-color:var(--border-focus); box-shadow:0 0 0 3px rgba(245,166,35,0.12); }
+    .input-wrap.error input { border-color:#dc3545; }
+    .input-wrap.filled input { background:#F0F4FF; border-color:#BFDBFE; color:#1D4ED8; }
+    [data-theme="dark"] .input-wrap.filled input { background:#1a2a3e; border-color:#2a4a6e; color:#93C5FD; }
+
+    .eye-btn { position:absolute; right:14px; background:none; border:none; cursor:pointer; color:#BBBBBB; display:flex; align-items:center; transition:color var(--transition); }
+    .eye-btn:hover { color:var(--orange); }
+
+    .field-error { font-size:12px; color:#dc3545; margin-top:5px; display:none; }
+    .field-error.show { display:block; }
+
+    /* BUTTON */
+    .btn-submit {
+      width:100%; padding:13px;
+      background:var(--orange); color:#fff; border:none;
+      border-radius:var(--radius-sm); font-size:15px; font-weight:700;
+      font-family:'Plus Jakarta Sans',sans-serif; cursor:pointer; margin-top:6px;
+      box-shadow:0 4px 20px rgba(245,166,35,0.35);
+      transition:background var(--transition),transform var(--transition),box-shadow var(--transition);
+    }
+    .btn-submit:hover { background:var(--orange-dark); transform:translateY(-1px); box-shadow:0 8px 28px rgba(245,166,35,0.45); }
+    .btn-submit:disabled { opacity:0.7; cursor:not-allowed; transform:none; }
+
+    .signup-link { text-align:center; font-size:13.5px; color:var(--text-light); margin-top:20px; }
+    .signup-link a { color:var(--orange); font-weight:600; text-decoration:none; }
+    .signup-link a:hover { text-decoration:underline; }
+
+    /* TOAST — bottom right like Figma */
+    .toast {
+      position: fixed; bottom: 28px; right: 28px;
+      background: #7B1A1A; color: #fff;
+      padding: 14px 20px; border-radius: var(--radius-sm);
+      font-size: 14px; font-weight: 500; max-width: 340px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+      display: flex; align-items: flex-start; gap: 12px;
+      transform: translateX(120%); opacity: 0;
+      transition: transform 0.4s cubic-bezier(0.34,1.2,0.64,1), opacity 0.3s;
+      z-index: 999; line-height: 1.5;
+    }
+    .toast.show { transform: translateX(0); opacity: 1; }
+    .toast.success { background: #1d7a3a; }
+    .toast-icon { flex-shrink:0; margin-top:1px; }
+
+    /* FOOTER */
+    footer { background:var(--bg-white); border-top:1px solid var(--border); padding:24px 48px; display:flex; align-items:center; justify-content:space-between; transition:background var(--transition),border-color var(--transition); }
+    .footer-logo { display:flex; align-items:center; gap:8px; font-family:'Clash Display',sans-serif; font-weight:700; font-size:17px; color:var(--text-dark); text-decoration:none; }
+    .footer-logo svg { color:var(--orange); }
+    .footer-copy { font-size:13.5px; color:var(--text-light); }
+    .footer-links { display:flex; gap:24px; }
+    .footer-links a { font-size:13.5px; color:var(--text-mid); text-decoration:none; transition:color var(--transition); }
+    .footer-links a:hover { color:var(--orange); }
+
+    @media (max-width:600px) {
+      nav{padding:0 20px;} .nav-links{display:none;}
+      .form-card{padding:30px 22px;}
+      footer{flex-direction:column;gap:12px;text-align:center;padding:20px;}
+      .toast{right:16px;left:16px;max-width:none;}
+    }
+  
+    /* ── SCROLL TO TOP BUTTON ── */
+    #scrollTopBtn{position:fixed;bottom:150px;right:24px;width:44px;height:44px;background:var(--orange,#F5A623);color:#fff;border:none;border-radius:50%;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(245,166,35,0.4);z-index:500;transition:all 0.3s;font-size:18px;}
+    #scrollTopBtn:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(245,166,35,0.5);}
+    #scrollTopBtn.show{display:flex;}
+
+    /* ── MOBILE HAMBURGER ── */
+    .hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:6px;}
+    .hamburger span{display:block;width:22px;height:2px;background:var(--text-dark,#1A1A2E);border-radius:2px;transition:all 0.3s;}
+    .mobile-menu{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;}
+    .mobile-menu.open{display:block;}
+    .mobile-menu-inner{position:absolute;right:0;top:0;bottom:0;width:260px;background:var(--bg-white,#fff);padding:24px;display:flex;flex-direction:column;gap:0;box-shadow:-4px 0 24px rgba(0,0,0,0.15);}
+    .mobile-menu-inner .close-btn{align-self:flex-end;background:none;border:none;font-size:22px;cursor:pointer;color:var(--text-dark,#1A1A2E);margin-bottom:16px;}
+    .mobile-menu-inner a,.mobile-menu-inner button{display:block;padding:14px 0;font-size:16px;font-weight:600;color:var(--text-dark,#1A1A2E);text-decoration:none;border-bottom:1px solid var(--border,#E8E8E8);background:none;border-top:none;border-left:none;border-right:none;text-align:left;cursor:pointer;font-family:inherit;}
+    .mobile-menu-inner a:hover{color:var(--orange,#F5A623);}
+    @media(max-width:768px){.hamburger{display:flex;}.nav-links{display:none !important;}.nav-right .btn-login,.nav-right .btn-signup{display:none;}}
+    
+    /* ── GLOBAL SMOOTH ── */
+    html { scroll-behavior: smooth; }
+    * { -webkit-tap-highlight-color: transparent; }
+
+    /* ── PAGE TRANSITION ── */
+    body { animation: pageIn 0.35s ease both; }
+    @keyframes pageIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="index.html" class="nav-logo">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      EventSphere
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="events.html">Events</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="dark-toggle" id="darkToggle">
+        <svg id="darkIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="btn-login-nav">Login</button>
+      <button class="btn-signup-nav" onclick="window.location.href='signup.html'">Sign up</button>
+    </div>
+  </nav>
+
+<!-- Scroll to Top Button -->
+<button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top">↑</button>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu" onclick="closeMobileMenu(event)">
+  <div class="mobile-menu-inner">
+    <button class="close-btn" onclick="document.getElementById('mobileMenu').classList.remove('open')">✕</button>
+    <a href="index.html">🏠 Home</a>
+    <a href="events.html">📅 Events</a>
+    <a href="about.html">ℹ️ About</a>
+    <a href="contact.html">📬 Contact</a>
+    <a href="dashboard.html" id="mobileDbLink" style="display:none">📊 Dashboard</a>
+    <a href="admin.html" id="mobileAdminLink" style="display:none;color:var(--orange,#F5A623)">🛡️ Admin</a>
+    <button onclick="doNavLogout()" id="mobileLogoutBtn" style="display:none;color:#dc3545;padding:14px 0;font-size:16px;font-weight:600;font-family:inherit;background:none;border:none;border-bottom:1px solid var(--border,#E8E8E8);text-align:left;cursor:pointer;">⬡ Logout</button>
+    <a href="login.html" id="mobileLoginLink">🔐 Login</a>
+    <a href="signup.html" id="mobileSignupLink" style="color:var(--orange,#F5A623)">✍️ Sign Up</a>
+  </div>
+</div>
+
+
+  <!-- MAIN -->
+  <main>
+    <div class="form-card">
+      <h1>Welcome Back</h1>
+      <p class="subtitle">Log in to manage your registrations</p>
+      <!-- Email -->
+      <div class="field">
+        <label for="email">Email Address</label>
+        <div class="input-wrap" id="emailWrap">
+          <span class="input-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </span>
+          <input type="email" id="email" placeholder="you@college.edu" autocomplete="email"/>
+        </div>
+        <div class="field-error" id="emailErr">Please enter a valid email address.</div>
+      </div>
+
+      <!-- Password -->
+      <div class="field">
+        <label for="password">Password</label>
+        <div class="input-wrap" id="passWrap">
+          <span class="input-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </span>
+          <input type="password" id="password" placeholder="••••••••" autocomplete="current-password"/>
+          <button class="eye-btn" id="eyeBtn" type="button" tabindex="-1">
+            <svg id="eyeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div class="field-error" id="passErr">Please enter your password.</div>
+      </div>
+
+      <button class="btn-submit" id="submitBtn" onclick="handleLogin()">Log in</button>
+
+      <p style="text-align:center;margin-top:12px;"><a href="forgot-password.html" style="font-size:13px;color:#999;text-decoration:none;" onmouseover="this.style.color='#F5A623'" onmouseout="this.style.color='#999'">Forgot Password?</a></p>
+
+      <p class="signup-link">Don't have an account? <a href="signup.html">Sign up</a></p>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <a href="index.html" class="footer-logo">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      EventSphere
+    </a>
+    <p class="footer-copy">© 2026 EventSphere. All rights reserved.</p>
+    <div class="footer-links">
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </footer>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast">
+    <span class="toast-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    </span>
+    <span id="toastMsg">Invalid email or password. Please check your credentials.</span>
+  </div>
+
+  <script>
+    // ── Scroll to Top ──────────────────────────────────────
+    window.addEventListener('scroll', () => {
+      const btn = document.getElementById('scrollTopBtn');
+      if(btn) btn.classList.toggle('show', window.scrollY > 300);
+    });
+
+    // ── Mobile Menu ────────────────────────────────────────
+    function openMobileMenu() {
+      document.getElementById('mobileMenu').classList.add('open');
+    }
+    function closeMobileMenu(e) {
+      if(e.target === document.getElementById('mobileMenu'))
+        document.getElementById('mobileMenu').classList.remove('open');
+    }
+    // Update mobile menu based on login state
+    (function() {
+      const u = JSON.parse(localStorage.getItem('user')||'null');
+      if(u && u.name) {
+        const dbLink = document.getElementById('mobileDbLink');
+        const logoutBtn = document.getElementById('mobileLogoutBtn');
+        const loginLink = document.getElementById('mobileLoginLink');
+        const signupLink = document.getElementById('mobileSignupLink');
+        const adminLink = document.getElementById('mobileAdminLink');
+        if(dbLink) dbLink.style.display='block';
+        if(logoutBtn) logoutBtn.style.display='block';
+        if(loginLink) loginLink.style.display='none';
+        if(signupLink) signupLink.style.display='none';
+        if(adminLink && u.role==='admin') adminLink.style.display='block';
+      }
+    })();
+
+
+    // Dark mode
+    const toggle = document.getElementById('darkToggle');
+    const icon   = document.getElementById('darkIcon');
+    const html   = document.documentElement;
+    const sunSVG  = `<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>`;
+    const moonSVG = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
+    if (localStorage.getItem('theme') === 'dark') { html.setAttribute('data-theme','dark'); icon.innerHTML = sunSVG; }
+    toggle.addEventListener('click', () => {
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      if (isDark) { html.removeAttribute('data-theme'); icon.innerHTML = moonSVG; localStorage.setItem('theme','light'); }
+      else { html.setAttribute('data-theme','dark'); icon.innerHTML = sunSVG; localStorage.setItem('theme','dark'); }
+    });
+
+    // Eye toggle
+    const eyeBtn = document.getElementById('eyeBtn');
+    const passInput = document.getElementById('password');
+    const eyeIcon = document.getElementById('eyeIcon');
+    const eyeOpen   = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+    const eyeClosed = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>`;
+    eyeBtn.addEventListener('click', () => {
+      const isPass = passInput.type === 'password';
+      passInput.type = isPass ? 'text' : 'password';
+      eyeIcon.innerHTML = isPass ? eyeClosed : eyeOpen;
+    });
+    // Toast
+    function showToast(msg, type = '') {
+      const t = document.getElementById('toast');
+      const m = document.getElementById('toastMsg');
+      m.textContent = msg;
+      t.className = 'toast show ' + type;
+      // Update icon color for success
+      t.querySelector('.toast-icon svg').setAttribute('stroke', '#fff');
+      setTimeout(() => { t.className = 'toast'; }, 4000);
+    }
+
+    // Validation
+    function validate() {
+      let ok = true;
+      const email = document.getElementById('email').value;
+      const pass  = document.getElementById('password').value;
+      const emailWrap = document.getElementById('emailWrap');
+      const passWrap  = document.getElementById('passWrap');
+      const emailErr  = document.getElementById('emailErr');
+      const passErr   = document.getElementById('passErr');
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        emailWrap.classList.add('error'); emailErr.classList.add('show'); ok = false;
+      } else { emailWrap.classList.remove('error'); emailErr.classList.remove('show'); }
+
+      if (pass.length < 1) {
+        passWrap.classList.add('error'); passErr.classList.add('show'); ok = false;
+      } else { passWrap.classList.remove('error'); passErr.classList.remove('show'); }
+
+      return ok;
+    }
+
+    // Demo users stored in localStorage (registered via signup)
+    function getDemoUsers() {
+      return JSON.parse(localStorage.getItem('evs_users') || '[]');
+    }
+
+    async function handleLogin() {
+      if (!validate()) return;
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true; btn.textContent = 'Logging in…';
+
+      const email = document.getElementById('email').value.trim().toLowerCase();
+      const pass  = document.getElementById('password').value;
+
+      // Detect backend URL — respect saved URL from previous successful login
+      let backendURL = localStorage.getItem('backendURL') ||
+        ((window.location.port === '5000' || window.location.port === '3000') ? '' : 'http://localhost:5000');
+
+      try {
+        // Increased timeout to 10s, separate fetch from abort logic
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        let res, data;
+        try {
+          res = await fetch(backendURL + '/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password: pass }),
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+          data = await res.json();
+        } catch(fetchErr) {
+          clearTimeout(timeoutId);
+          throw fetchErr; // network error — go to demo mode
+        }
+
+        if (res.ok) {
+          localStorage.setItem('token', data.token || '');
+          localStorage.setItem('user', JSON.stringify(data.user || {}));
+          localStorage.setItem('backendURL', backendURL);
+          const isAdmin = data.user && data.user.role === 'admin';
+          showToast(isAdmin ? '✓ Welcome Admin! Redirecting…' : '✓ Login successful! Redirecting…', 'success');
+          setTimeout(() => { window.location.href = isAdmin ? 'admin.html' : 'index.html'; }, 1200);
+          return;
+        } else {
+          // Backend responded with error — show it, do NOT fall to demo mode
+          showToast(data.message || 'Invalid email or password.', 'error');
+          btn.disabled = false; btn.textContent = 'Log in';
+          return;
+        }
+      } catch (err) {
+        // Only fall to demo mode on actual network failure (backend not running)
+        console.log('Backend not reachable, using demo mode:', err.message);
+      }
+
+      // 2. Demo fallback: check hardcoded admin
+      if (email === 'admin@eventsphere.com' && pass === 'Admin@123') {
+        const adminUser = { user_id:1, name:'Admin User', email:'admin@eventsphere.com', college:'EventSphere HQ', city:'Pune', role:'admin' };
+        localStorage.setItem('token', 'demo-admin-token');
+        localStorage.setItem('user', JSON.stringify(adminUser));
+        showToast('✓ Welcome Admin! Redirecting…', 'success');
+        setTimeout(() => { window.location.href = 'admin.html'; }, 1200);
+        return;
+      }
+
+      // 3. Check registered demo users from signup
+      const demoUsers = getDemoUsers();
+      const found = demoUsers.find(u => u.email.toLowerCase() === email && u.password === pass);
+      if (found) {
+        const { password: _, ...safeUser } = found;
+        localStorage.setItem('token', 'demo-user-token-' + found.user_id);
+        localStorage.setItem('user', JSON.stringify(safeUser));
+        showToast('✓ Login successful! Redirecting…', 'success');
+        setTimeout(() => { window.location.href = 'index.html'; }, 1200);
+        return;
+      }
+
+      // No match
+      showToast('Invalid email or password.', 'error');
+      btn.disabled = false; btn.textContent = 'Log in';
+    }
+  </script>
+</body>
+</html>

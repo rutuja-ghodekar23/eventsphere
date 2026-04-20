@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Event Details – EventSphere</title>
+  <link rel="manifest" href="manifest.json"/>
+  <meta name="theme-color" content="#F5A623"/>
+  <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});</script>
+  <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --orange:#F5A623; --orange-dark:#E09400; --orange-light:#FDE8CC;
+      --text-dark:#1A1A2E; --text-mid:#555; --text-light:#999;
+      --bg-white:#FFFFFF; --bg-light:#F9F9F9; --border:#E8E8E8;
+      --shadow:0 4px 24px rgba(0,0,0,0.07); --shadow-card:0 8px 36px rgba(0,0,0,0.09);
+      --radius:16px; --radius-sm:10px; --transition:0.25s cubic-bezier(0.4,0,0.2,1);
+    }
+    [data-theme="dark"] {
+      --text-dark:#F0F0F0; --text-mid:#CCC; --text-light:#888;
+      --bg-white:#121212; --bg-light:#1A1A1A; --border:#2A2A2A;
+      --shadow:0 4px 24px rgba(0,0,0,0.4); --shadow-card:0 8px 36px rgba(0,0,0,0.5);
+      --orange-light:#3a2200;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg-white);color:var(--text-dark);transition:background var(--transition),color var(--transition);}
+
+    /* NAV */
+    nav{position:sticky;top:0;z-index:100;background:var(--bg-white);border-bottom:1px solid var(--border);padding:0 48px;height:64px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(0,0,0,0.04);transition:background var(--transition),border-color var(--transition);}
+    .nav-logo{display:flex;align-items:center;gap:8px;text-decoration:none;font-family:'Clash Display',sans-serif;font-weight:700;font-size:20px;color:var(--text-dark);}
+    .nav-logo svg{color:var(--orange);}
+    .nav-links{display:flex;align-items:center;gap:36px;list-style:none;}
+    .nav-links a{text-decoration:none;font-size:14.5px;font-weight:500;color:var(--text-mid);transition:color var(--transition);}
+    .nav-links a:hover{color:var(--orange);}
+    .nav-right{display:flex;align-items:center;gap:16px;}
+    .dark-toggle{background:none;border:none;cursor:pointer;color:var(--text-mid);padding:6px;border-radius:50%;display:flex;align-items:center;transition:color var(--transition);}
+    .dark-toggle:hover{color:var(--orange);}
+    .btn-login-nav{background:none;border:none;cursor:pointer;font-size:14.5px;font-weight:500;color:var(--text-dark);font-family:'Plus Jakarta Sans',sans-serif;transition:color var(--transition);}
+    .btn-login-nav:hover{color:var(--orange);}
+    .btn-signup-nav{background:var(--orange);color:#fff;border:none;border-radius:var(--radius-sm);padding:9px 22px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;box-shadow:0 4px 16px rgba(245,166,35,0.3);transition:background var(--transition),transform var(--transition);}
+    .btn-signup-nav:hover{background:var(--orange-dark);transform:translateY(-1px);}
+
+    /* HERO */
+    .hero{position:relative;height:280px;background:#111;overflow:hidden;}
+    .hero-img{width:100%;height:100%;object-fit:cover;opacity:0.55;}
+    .hero-overlay{position:absolute;inset:0;background:linear-gradient(to right,rgba(0,0,0,0.75) 0%,rgba(0,0,0,0.3) 60%,rgba(0,0,0,0.1) 100%);}
+    .back-link{position:absolute;top:20px;left:48px;color:rgba(255,255,255,0.85);font-size:13.5px;font-weight:500;text-decoration:none;display:flex;align-items:center;gap:6px;transition:color var(--transition);}
+    .back-link:hover{color:#fff;}
+    .hero-content{position:absolute;bottom:32px;left:48px;}
+    .hero-badges{display:flex;gap:8px;margin-bottom:10px;}
+    .badge{padding:5px 13px;border-radius:50px;font-size:12px;font-weight:600;}
+    .badge-status { background:var(--orange); color:#fff !important; border-radius:50px; padding:4px 12px; font-size:12px; font-weight:700; }
+    .badge-status.completed{background:#6c757d;}
+    .badge-status.ongoing{background:#28a745;}
+    .badge-category{background:rgba(255,255,255,0.18);color:#fff;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.25);}
+    .hero-title{font-family:'Clash Display',sans-serif;font-size:clamp(26px,3.5vw,40px);font-weight:700;color:#fff;letter-spacing:-0.5px;margin-bottom:8px;}
+    .hero-location{display:flex;align-items:center;gap:6px;color:rgba(255,255,255,0.8);font-size:14px;}
+    .hero-location svg{color:var(--orange);}
+
+    /* COUNTDOWN */
+    .countdown-box{position:absolute;bottom:32px;right:48px;background:rgba(20,20,20,0.82);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:18px 24px;text-align:center;min-width:280px;}
+    .countdown-label{font-size:11px;font-weight:700;letter-spacing:1.5px;color:rgba(255,255,255,0.6);text-transform:uppercase;margin-bottom:12px;}
+    .countdown-timer{display:flex;gap:10px;justify-content:center;}
+    .time-unit{text-align:center;}
+    .time-num{background:rgba(255,255,255,0.12);border-radius:8px;padding:8px 14px;font-family:'Clash Display',sans-serif;font-size:26px;font-weight:700;color:#fff;min-width:52px;display:block;line-height:1;}
+    .time-label{font-size:10px;letter-spacing:1px;color:rgba(255,255,255,0.5);text-transform:uppercase;margin-top:5px;}
+
+    /* BODY LAYOUT */
+    .body-layout{display:grid;grid-template-columns:1fr 320px;gap:32px;padding:48px 48px 80px;align-items:start;}
+
+    /* ABOUT */
+    .about-section h2{font-family:'Clash Display',sans-serif;font-size:22px;font-weight:700;color:var(--text-dark);margin-bottom:20px;}
+    .about-section p{font-size:15px;color:var(--text-mid);line-height:1.8;margin-bottom:16px;}
+
+    /* DATE & LOCATION CARD */
+    .info-card{background:var(--bg-light);border:1px solid var(--border);border-radius:var(--radius);padding:22px 28px;margin-top:32px;display:grid;grid-template-columns:1fr 1fr;gap:20px;transition:background var(--transition),border-color var(--transition);}
+    .info-item{display:flex;align-items:flex-start;gap:14px;}
+    .info-icon{width:40px;height:40px;background:var(--orange-light);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .info-icon svg{color:var(--orange);}
+    .info-label{font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text-light);margin-bottom:4px;}
+    .info-val{font-size:15px;font-weight:700;color:var(--text-dark);}
+    .info-sub{font-size:13px;color:var(--text-mid);}
+
+    /* REGISTRATION SIDEBAR */
+    .reg-card{background:var(--bg-white);border:1px solid var(--border);border-radius:var(--radius);padding:26px;box-shadow:var(--shadow-card);position:sticky;top:84px;transition:background var(--transition),border-color var(--transition);}
+    .reg-title{display:flex;align-items:center;gap:10px;font-family:'Clash Display',sans-serif;font-size:18px;font-weight:700;color:var(--text-dark);margin-bottom:20px;}
+    .reg-title svg{color:var(--orange);}
+    .seats-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+    .seats-label{font-size:13px;color:var(--text-light);font-weight:500;}
+    .seats-count{font-size:13px;font-weight:700;color:var(--text-mid);}
+    .progress-bg{height:6px;background:#F0F0F0;border-radius:50px;overflow:hidden;margin-bottom:12px;}
+    [data-theme="dark"] .progress-bg{background:#2a2a2a;}
+    .progress-fill{height:100%;border-radius:50px;background:var(--orange);transition:width 1s ease;}
+    .progress-fill.full{background:#dc3545;}
+    .seats-remaining{font-size:13px;color:var(--text-mid);text-align:center;margin-bottom:20px;font-weight:500;}
+    .btn-register{display:block;width:100%;padding:13px;background:var(--orange);color:#fff;border:none;border-radius:var(--radius-sm);font-size:15px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;text-align:center;text-decoration:none;box-shadow:0 4px 20px rgba(245,166,35,0.35);transition:background var(--transition),transform var(--transition),box-shadow var(--transition);}
+    .btn-register:hover{background:var(--orange-dark);transform:translateY(-1px);box-shadow:0 8px 28px rgba(245,166,35,0.45);}
+    .btn-register.full{background:#6c757d;cursor:not-allowed;transform:none;box-shadow:none;}
+    .btn-outline{display:block;width:100%;padding:11px;background:transparent;color:var(--orange);border:2px solid var(--orange);border-radius:var(--radius-sm);font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;text-align:center;text-decoration:none;transition:background var(--transition),color var(--transition);margin-top:10px;}
+    .btn-outline:hover{background:var(--orange);color:#fff;}
+    .btn-waitlist{display:block;width:100%;padding:11px;background:#6c757d;color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;text-align:center;margin-top:10px;transition:background var(--transition);}
+    .btn-waitlist:hover{background:#5a6268;}
+    .btn-waitlist.on-list{background:#28a745;}
+    .pill-badge{display:inline-block;padding:4px 12px;border-radius:50px;font-size:12px;font-weight:600;margin:3px 3px 3px 0;}
+    .pill-free{background:#d1fae5;color:#065f46;}
+    .pill-paid{background:#fff3cd;color:#856404;}
+    .pill-tag{background:#e0f2fe;color:#0369a1;}
+    [data-theme="dark"] .pill-tag{background:#1e3a5f;color:#93c5fd;}
+    .pill-skill{background:#f3e8ff;color:#7e22ce;}
+    [data-theme="dark"] .pill-skill{background:#3b1f5f;color:#c4b5fd;}
+    .section-label{font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-light);margin-bottom:8px;margin-top:18px;}
+    .ext-link-btn{display:block;width:100%;padding:11px;background:transparent;color:#0369a1;border:2px solid #93c5fd;border-radius:var(--radius-sm);font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;text-align:center;text-decoration:none;margin-top:10px;transition:background var(--transition),color var(--transition);}
+    .ext-link-btn:hover{background:#0369a1;color:#fff;border-color:#0369a1;}
+    .map-embed-wrap{margin-top:12px;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border);}
+    .map-embed-wrap iframe{width:100%;height:220px;border:none;display:block;}
+    .razorpay-badge{display:block;text-align:center;font-size:11px;color:var(--text-light);margin-top:8px;}
+
+    /* FOOTER */
+    footer{background:var(--bg-white);border-top:1px solid var(--border);padding:24px 48px;display:flex;align-items:center;justify-content:space-between;transition:background var(--transition),border-color var(--transition);}
+    .footer-logo{display:flex;align-items:center;gap:8px;font-family:'Clash Display',sans-serif;font-weight:700;font-size:17px;color:var(--text-dark);text-decoration:none;}
+    .footer-logo svg{color:var(--orange);}
+    .footer-copy{font-size:13.5px;color:var(--text-light);}
+    .footer-links{display:flex;gap:24px;}
+    .footer-links a{font-size:13.5px;color:var(--text-mid);text-decoration:none;transition:color var(--transition);}
+    .footer-links a:hover{color:var(--orange);}
+
+    @media(max-width:900px){.body-layout{grid-template-columns:1fr;}.countdown-box{display:none;}}
+    @media(max-width:600px){nav{padding:0 20px;}.nav-links{display:none;}.hero-content{left:20px;}.back-link{left:20px;}.body-layout{padding:28px 20px 60px;}.info-card{grid-template-columns:1fr;}footer{flex-direction:column;gap:12px;text-align:center;padding:20px;}}
+  
+    /* ── SCROLL TO TOP BUTTON ── */
+    #scrollTopBtn{position:fixed;bottom:28px;right:28px;width:44px;height:44px;background:var(--orange,#F5A623);color:#fff;border:none;border-radius:50%;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(245,166,35,0.4);z-index:500;transition:all 0.3s;font-size:18px;}
+    #scrollTopBtn:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(245,166,35,0.5);}
+    #scrollTopBtn.show{display:flex;}
+
+    /* ── MOBILE HAMBURGER ── */
+    .hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:6px;}
+    .hamburger span{display:block;width:22px;height:2px;background:var(--text-dark,#1A1A2E);border-radius:2px;transition:all 0.3s;}
+    .mobile-menu{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;}
+    .mobile-menu.open{display:block;}
+    .mobile-menu-inner{position:absolute;right:0;top:0;bottom:0;width:260px;background:var(--bg-white,#fff);padding:24px;display:flex;flex-direction:column;gap:0;box-shadow:-4px 0 24px rgba(0,0,0,0.15);}
+    .mobile-menu-inner .close-btn{align-self:flex-end;background:none;border:none;font-size:22px;cursor:pointer;color:var(--text-dark,#1A1A2E);margin-bottom:16px;}
+    .mobile-menu-inner a,.mobile-menu-inner button{display:block;padding:14px 0;font-size:16px;font-weight:600;color:var(--text-dark,#1A1A2E);text-decoration:none;border-bottom:1px solid var(--border,#E8E8E8);background:none;border-top:none;border-left:none;border-right:none;text-align:left;cursor:pointer;font-family:inherit;}
+    .mobile-menu-inner a:hover{color:var(--orange,#F5A623);}
+    @media(max-width:768px){.hamburger{display:flex;}.nav-links{display:none !important;}.nav-right .btn-login,.nav-right .btn-signup{display:none;}}
+    
+    /* ── GLOBAL SMOOTH ── */
+    html { scroll-behavior: smooth; }
+    * { -webkit-tap-highlight-color: transparent; }
+
+    /* ── PAGE TRANSITION ── */
+    body { animation: pageIn 0.35s ease both; }
+    @keyframes pageIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+  </style>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <style>
+    /* Payment styles */
+    .pay-section{margin-top:16px;padding-top:16px;border-top:1px solid var(--border);}
+    .pay-section h4{font-size:13px;font-weight:700;color:var(--text-dark);margin-bottom:10px;}
+    .price-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+    .price-label{font-size:14px;color:var(--text-mid);}
+    .price-val{font-family:'Clash Display',sans-serif;font-size:22px;font-weight:700;color:var(--orange);}
+    .price-free{font-family:'Clash Display',sans-serif;font-size:18px;font-weight:700;color:#27AE60;}
+    .pay-note{font-size:11.5px;color:var(--text-light);text-align:center;margin-top:8px;}
+    .pay-note span{color:var(--orange);font-weight:600;}
+    .btn-pay{display:block;width:100%;padding:13px;background:linear-gradient(135deg,#27AE60,#229954);color:#fff;border:none;border-radius:var(--radius-sm);font-size:15px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;text-align:center;box-shadow:0 4px 20px rgba(39,174,96,0.3);transition:all 0.25s ease;margin-top:10px;}
+    .btn-pay:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(39,174,96,0.4);}
+    .btn-pay:disabled{opacity:0.65;cursor:not-allowed;transform:none;}
+    .paid-badge{display:inline-flex;align-items:center;gap:5px;background:#E8F8EE;color:#27AE60;font-size:12px;font-weight:700;padding:4px 12px;border-radius:50px;margin-bottom:10px;}
+    .already-reg{background:#E8F8EE;border:1.5px solid #27AE60;border-radius:10px;padding:14px;text-align:center;font-size:14px;font-weight:600;color:#27AE60;}
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="index.html" class="nav-logo">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      EventSphere
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="events.html">Events</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="dark-toggle" id="darkToggle">
+        <svg id="darkIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="btn-login-nav" onclick="window.location.href='login.html'">Login</button>
+      <button class="btn-signup-nav" onclick="window.location.href='signup.html'">Sign up</button>
+    </div>
+  </nav>
+
+<!-- Scroll to Top Button -->
+<button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top">↑</button>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu" onclick="closeMobileMenu(event)">
+  <div class="mobile-menu-inner">
+    <button class="close-btn" onclick="document.getElementById('mobileMenu').classList.remove('open')">✕</button>
+    <a href="index.html">🏠 Home</a>
+    <a href="events.html">📅 Events</a>
+    <a href="about.html">ℹ️ About</a>
+    <a href="contact.html">📬 Contact</a>
+    <a href="dashboard.html" id="mobileDbLink" style="display:none">📊 Dashboard</a>
+    <a href="admin.html" id="mobileAdminLink" style="display:none;color:var(--orange,#F5A623)">🛡️ Admin</a>
+    <button onclick="doNavLogout()" id="mobileLogoutBtn" style="display:none;color:#dc3545;padding:14px 0;font-size:16px;font-weight:600;font-family:inherit;background:none;border:none;border-bottom:1px solid var(--border,#E8E8E8);text-align:left;cursor:pointer;">⬡ Logout</button>
+    <a href="login.html" id="mobileLoginLink">🔐 Login</a>
+    <a href="signup.html" id="mobileSignupLink" style="color:var(--orange,#F5A623)">✍️ Sign Up</a>
+  </div>
+</div>
+
+
+  <!-- HERO -->
+  <div class="hero" id="hero">
+    <img class="hero-img" id="heroImg" src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1400&q=80" alt="Event"/>
+    <div class="hero-overlay"></div>
+    <a href="events.html" class="back-link" id="backLink">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Back to Events
+    </a>
+    <div class="hero-content">
+      <div class="hero-badges">
+        <span class="badge badge-status" id="statusBadge">Upcoming</span>
+        <span class="badge badge-category" id="categoryBadge">Technical</span>
+      </div>
+      <h1 class="hero-title" id="heroTitle">AI ML Summit 2025</h1>
+      <div class="hero-location">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span id="heroLocation">Pune University, Pune</span>
+      </div>
+    </div>
+    <div class="countdown-box">
+      <div class="countdown-label">Event Starts In</div>
+      <div class="countdown-timer">
+        <div class="time-unit"><span class="time-num" id="cdDays">00</span><div class="time-label">Days</div></div>
+        <div class="time-unit"><span class="time-num" id="cdHours">00</span><div class="time-label">Hours</div></div>
+        <div class="time-unit"><span class="time-num" id="cdMins">00</span><div class="time-label">Mins</div></div>
+        <div class="time-unit"><span class="time-num" id="cdSecs">00</span><div class="time-label">Secs</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="body-layout">
+    <!-- ABOUT -->
+    <div class="about-section">
+      <h2>About this Event</h2>
+      <p id="eventDesc1">Join us for the AI ML Summit 2025 taking place at Pune University in Pune. This is a premier cultural event bringing together enthusiasts, professionals, and students from all over the country. Get ready to experience insightful sessions, engaging activities, and unparalleled networking opportunities.</p>
+      <p id="eventDesc2">Don't miss out on the chance to connect with like-minded individuals and industry leaders. Secure your spot now and be part of this incredible journey.</p>
+
+      <div class="info-card">
+        <div class="info-item">
+          <div class="info-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <div>
+            <div class="info-label">Date &amp; Time</div>
+            <div class="info-val" id="eventDate">March 30, 2026</div>
+            <div class="info-sub" id="eventTime">12:39 AM</div>
+          </div>
+        </div>
+        <div class="info-item">
+          <div class="info-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <div>
+            <div class="info-label">Location</div>
+            <div class="info-val" id="eventVenue">Pune University</div>
+            <div class="info-sub" id="eventCity">Pune</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REGISTRATION SIDEBAR -->
+    <div class="reg-card">
+      <div class="reg-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Registration Info
+      </div>
+      <div class="seats-row">
+        <span class="seats-label">Seats Filled</span>
+        <span class="seats-count" id="seatsCount">8 / 150</span>
+      </div>
+      <div class="progress-bg">
+        <div class="progress-fill" id="progressFill" style="width:5%"></div>
+      </div>
+      <div class="seats-remaining" id="seatsRemaining">142 seats remaining</div>
+      <!-- Payment / Registration section injected by JS -->
+      <div id="regActionArea">
+        <a href="register.html" class="btn-register" id="regBtn">Login to Register</a>
+      </div>
+      <!-- Tags, skills, paid, external link, map, waitlist, share, cert -->
+      <div id="extraDetails"></div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <a href="index.html" class="footer-logo">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      EventSphere
+    </a>
+    <p class="footer-copy">© 2026 EventSphere. All rights reserved.</p>
+    <div class="footer-links"><a href="about.html">About</a><a href="contact.html">Contact</a></div>
+  </footer>
+
+
+  <script>
+    // Auto-detect backend URL (works from Live Server AND localhost:5000)
+    const BURL = localStorage.getItem('backendURL') ||
+      (window.location.port === '5000' || window.location.port === '3000' ? '' : 'http://localhost:5000');
+    function apiUrl(path){ return BURL + path; }
+
+    // Dark mode
+    const toggle=document.getElementById('darkToggle'),icon=document.getElementById('darkIcon'),html=document.documentElement;
+    const sunSVG=`<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>`;
+    const moonSVG=`<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
+    if(localStorage.getItem('theme')==='dark'){html.setAttribute('data-theme','dark');icon.innerHTML=sunSVG;}
+    toggle.addEventListener('click',()=>{const isDark=html.getAttribute('data-theme')==='dark';if(isDark){html.removeAttribute('data-theme');icon.innerHTML=moonSVG;localStorage.setItem('theme','light');}else{html.setAttribute('data-theme','dark');icon.innerHTML=sunSVG;localStorage.setItem('theme','dark');}});
+
+    // Image map
+    const imageMap={Technical:'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1400&q=80',Workshop:'https://images.unsplash.com/photo-1558008258-3256797b43f3?w=1400&q=80',Cultural:'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1400&q=80',Sports:'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=1400&q=80',Seminar:'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=1400&q=80',Hackathon:'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1400&q=80',default:'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1400&q=80'};
+
+    // Unique descriptions for all 35 events
+    const DESC = {
+      1:{p1:"The AI ML Summit 2025 is Pune's most anticipated technical conference, bringing together India's brightest minds in Artificial Intelligence and Machine Learning at Pune University. Expect keynote sessions from IIT professors, live ML model demos, and workshops covering deep learning, NLP, and computer vision.",p2:"Whether you're a final-year student or a working professional, this summit offers unparalleled access to industry veterans, research papers, and real-world AI case studies. The summit concludes with a hackathon finals where top teams compete for a chance to present their AI projects to leading tech recruiters."},
+      2:{p1:"Cricket League Pune 2025 is the city's most thrilling inter-college cricket tournament at Pune University's expansive sports ground. Teams from over 20 colleges compete in a T20 format across three action-packed days, with live commentary, cheerleaders, and food stalls making it a full-blown festival.",p2:"From boundary sixes to nail-biting last-over finishes, this league promises an unforgettable sporting spectacle. Players will be scouted by local cricket clubs, and the winning team walks away with a trophy plus a prize purse of ₹50,000."},
+      3:{p1:"Startup Pitch Fest 2026 is Pune's premier entrepreneurship showcase where budding founders present their startup ideas to a panel of seasoned investors, venture capitalists, and industry mentors. This workshop-format event walks participants through pitch deck creation, financial modelling, and investor Q&A simulation before the big day.",p2:"Past editions have seeded three funded startups with combined funding of over ₹2 crore. Attendees gain exposure to Pune's thriving startup ecosystem, one-on-one mentorship slots, and direct networking with angel investors from Mumbai and Bangalore."},
+      4:{p1:"Web3 Seminar 2026 is a deep-dive exploration of the decentralised future of the internet, featuring talks on blockchain architecture, smart contract development on Ethereum and Solana, NFT marketplaces, and the societal implications of Web3 for India's digital economy.",p2:"The seminar includes a live dApp deployment session using MetaMask and Hardhat. Panels will cover India's regulatory stance on crypto, DeFi opportunities for college students, and how Web3 is reshaping creative and financial industries across the globe."},
+      5:{p1:"Python Bootcamp 2026 is an intensive two-day workshop at Pune University designed for students who want to go from zero to productive in Python. Covering everything from syntax basics to data structures, APIs, and an introduction to pandas and matplotlib, this bootcamp is project-driven from day one.",p2:"Each participant receives a certificate, course materials, and access to a private GitHub repository with all exercises. The bootcamp concludes with a mini-hackathon where teams build a real data analysis project, judged by senior software engineers from Pune-based tech companies."},
+      6:{p1:"HackPune 2026 is Pune's flagship 36-hour hackathon with problem statements from top companies like TCS, Infosys, and emerging fintech startups. Teams of up to four will hack through the night fuelled by free meals, energy drinks, and the spirit of innovation at Pune University's tech labs.",p2:"The prize pool crosses ₹1.5 lakh across three tracks: HealthTech, FinTech, and CleanTech. Expert mentors will be on the floor throughout the event, and top teams receive pre-placement interview opportunities. Last year's winner was offered a direct internship at a Pune unicorn startup."},
+      7:{p1:"Rangmanch Fest 2026 is Pune University's grand cultural celebration — a three-day extravaganza of theatre, dance, music, and spoken word. From classical Bharatanatyam to contemporary hip-hop battles, the stage belongs to students showcasing talent that goes far beyond textbooks.",p2:"The fest also features a seminar track with speakers discussing the intersection of arts and technology — think AI-generated music, digital theatre, and social media for artists. Over 2,000 students attend annually, making Rangmanch a landmark event in Pune's cultural calendar."},
+      8:{p1:"National Debate 2025 was a landmark competitive debate tournament at MIT Pune, drawing teams from universities across India to argue complex policy, ethics, and social justice motions in the British Parliamentary format, with preliminary rounds leading up to a riveting grand finale.",p2:"This event has successfully concluded. The championship went to a team from Delhi University on the motion 'This House Believes AI will widen inequality in developing nations.' Recordings of all final rounds are available on the EventSphere YouTube channel for future reference."},
+      9:{p1:"Cybersecurity Summit 2026 at MIT Pune brings together ethical hackers, security researchers, and IT professionals to address India's most pressing digital security challenges. Sessions cover penetration testing, ransomware defence, zero-day vulnerabilities, and the legal landscape of cybercrime under the IT Act.",p2:"The summit features a live Capture The Flag (CTF) competition where participants crack real-world security challenges for prizes. Bug bounty hunters and CERT-In officials will also speak, making this essential for anyone pursuing a career in information security or cloud protection."},
+      10:{p1:"Cultural Fiesta Pune 2026 at Symbiosis is the ultimate cross-cultural celebration of India's diversity. Organised by Symbiosis Institute's student council, this three-day fest brings together folk dances from Rajasthan, Carnatic music from Tamil Nadu, Bihu from Assam, and Lavani from Maharashtra onto one vibrant stage.",p2:"Beyond performances, the fiesta hosts food stalls from 15 Indian states, art exhibitions, mehendi competitions, and a heritage photography walk. Corporate sponsors have funded a ₹1 lakh prize pool for the best cultural performances across categories."},
+      11:{p1:"Mumbai Marathon 2025 is Maharashtra's most celebrated long-distance running event, winding through iconic Mumbai streets from Mumbai University to the Marine Drive promenade. Open to all fitness levels with 5K, 10K, and full 42K categories, this event draws over 10,000 participants from across India every year.",p2:"Beyond the race, the marathon is a platform for social causes — past editions raised over ₹80 lakh for underprivileged education initiatives. Every registered runner receives a finisher medal, timing chip, event T-shirt, and complimentary post-race refreshments at the celebration zone."},
+      12:{p1:"Neon Nights 2026 is Mumbai's most talked-about cultural seminar and EDM festival fusion at Mumbai University. The evening begins with expert panels on the music industry, digital distribution, and artist branding in the age of Spotify and Instagram, before transforming into a neon-lit night of live DJ performances.",p2:"Featuring curated sets by three up-and-coming Mumbai DJs and a surprise headliner, Neon Nights blends intellectual discussion with pure entertainment. The venue is transformed with UV lights, LED installations, and interactive art panels that visually respond to the music."},
+      13:{p1:"IoT Expo 2026 at Mumbai University is Maharashtra's largest showcase of Internet of Things innovations, featuring over 40 live project demonstrations from students and startups. Exhibits range from smart farming sensors and home automation systems to industrial IoT for predictive maintenance and smart city infrastructure.",p2:"The expo includes panel discussions with IoT engineers from Bosch, Honeywell, and TCS, plus hands-on zones with Raspberry Pi projects, Arduino setups, and embedded AI models. Investors are invited to scout and fund promising IoT ventures directly at the expo."},
+      14:{p1:"Design Workshop 2026 at Mumbai University is a two-day immersive workshop for students and young professionals passionate about UI/UX, graphic design, and product thinking. Led by senior designers from Mumbai's top agencies, the workshop covers design systems, Figma prototyping, user research, and accessibility best practices.",p2:"Participants leave with a portfolio-ready case study, feedback from industry professionals, and lifetime access to the workshop's design resource library. A final design challenge on Day 2 gives participants a chance to win a paid internship at a leading Mumbai design studio."},
+      15:{p1:"DevOps Summit 2026 at Mumbai University is a high-energy technical conference focused on modern software delivery practices. Industry experts from Flipkart, Razorpay, and Paytm will share real-world DevOps war stories covering CI/CD pipelines, Docker, Kubernetes, infrastructure as code, and Site Reliability Engineering.",p2:"The summit includes a live demo of deploying a microservices application on AWS using Terraform and GitHub Actions. Networking breaks and a startup showcase round out two jam-packed days that previous attendees have described as career-changing."},
+      16:{p1:"CodeStorm 2026 is Mumbai University's high-octane competitive programming contest, bringing together Maharashtra's sharpest coders for eight hours of algorithm challenges and data structure puzzles under pressure. Problems are curated by IIT alumni and increase in difficulty every 90 minutes throughout the contest.",p2:"Top performers are awarded cash prizes, internship opportunities, and fast-track interview slots at participating companies. The contest uses a live leaderboard visible to all participants, creating an electric competitive atmosphere that experienced coders find truly addictive."},
+      17:{p1:"Ignite 2026 at Mumbai University is Maharashtra's premier leadership and entrepreneurship seminar, designed to spark the ambition of the next generation of Indian leaders. Speakers include CXOs of listed companies, successful social entrepreneurs, and policy makers sharing candid stories of failure, reinvention, and success.",p2:"The seminar features structured networking sessions, a speed mentoring zone with 7-minute one-on-one sessions with industry veterans, and a closing panel where students pitch ideas directly to an audience of potential collaborators and investors."},
+      18:{p1:"Music Mela 2026 at VJTI Mumbai is a daylong celebration of India's musical heritage and contemporary sounds, from classical ragas performed at dawn to indie pop headliners at sunset. The mela transforms VJTI's open grounds into a multi-stage festival with six performance areas running simultaneously.",p2:"Student bands, solo artists, and invited professional musicians all share the same stage philosophy — music belongs to everyone. Stalls sell handcrafted instruments, vinyl records, and fusion street food. A songwriting competition awards studio recording time as the first prize."},
+      19:{p1:"Blockchain Workshop 2026 at IIT Bombay is an advanced technical workshop for developers and finance professionals wanting to understand and build on blockchain technology. Topics include distributed ledger fundamentals, Solidity smart contract programming, DeFi protocol design, and real-world tokenisation case studies.",p2:"Led by IIT Bombay faculty and practising blockchain engineers, this workshop is limited to 150 participants for hands-on guidance. Participants will deploy their own ERC-20 token on a test network by end of Day 1, and build a basic decentralised exchange prototype on Day 2."},
+      20:{p1:"Sports Carnival Mumbai 2026 at SIES Mumbai is a massive multi-sport tournament across football, basketball, volleyball, badminton, and table tennis, running over five days on SIES's newly renovated sports complex. Over 600 athletes from 30 colleges compete for city bragging rights and championship trophies.",p2:"Beyond competition, the carnival features sports science talks, nutrition workshops by certified dietitians, and demos of sports analytics tools. Professional referees officiate every match, and all results are tracked live on EventSphere so families and fans can follow the action from anywhere."},
+      21:{p1:"Orange City Hackathon 2026 at Nagpur University is Vidarbha's biggest coding event, challenging participants to build innovative tech solutions for Orange City's unique urban challenges — from agricultural supply chain optimisation to smart traffic management and rural healthcare access.",p2:"Teams have 24 hours to ideate, prototype, and present their solutions. Nagpur's civic administration is directly involved, and winning solutions will be seriously considered for pilot implementation in the city. Mentors from Nagpur's growing tech ecosystem will guide teams through the night."},
+      22:{p1:"Innovation Workshop Nagpur 2026 at Nagpur University is a hands-on ideation and product development workshop focused on solving problems unique to Tier-2 cities and rural India. Participants learn design thinking methodology, rapid prototyping with low-code tools, and customer discovery techniques from expert facilitators.",p2:"The workshop concludes with a demo day where teams present minimum viable products to local entrepreneurs and NGO representatives. The most impactful solution receives incubation support from Nagpur University's startup cell and a seed grant to develop a real-world pilot programme."},
+      23:{p1:"Nagpur Cultural Fest 2026 is a vibrant celebration of Vidarbha's rich heritage and India's diverse cultures, hosted at Nagpur University's beautiful open-air amphitheatre. The fest showcases Gondi tribal performances, classical Hindustani music, Lavani dance, and contemporary fusion theatre in a three-day carnival.",p2:"The seminar track features speakers on cultural preservation in the digital age, including museum curators, documentary filmmakers, and indigenous art collectors. Street food from across Maharashtra, craft stalls, and a heritage photography exhibition complete this unforgettable cultural experience."},
+      24:{p1:"TechTalks Nagpur 2026 at VNIT is a curated series of short-format technical talks — each 18 minutes, TED-style — covering emerging technologies reshaping industries. Topics this edition include quantum computing basics, AI in agriculture, drone delivery logistics, and the future of work in a post-automation economy.",p2:"VNIT's engineering faculty curate the speaker lineup, ensuring technical rigour without sacrificing accessibility. The talks are live-streamed on YouTube and professionally recorded for VNIT's open-access learning platform, giving the content global reach well beyond the event day."},
+      25:{p1:"Green Earth Summit 2026 at RCOEM Nagpur is a sustainability-focused seminar bringing together environmental scientists, policymakers, NGO leaders, and socially conscious students to discuss India's path toward a greener future. Sessions cover renewable energy transitions, water conservation, urban tree cover, and zero-waste campus initiatives.",p2:"The summit includes a panel on student-led environmental movements and a workshop on carbon footprint calculation for organisations. Attendees will leave with a personal sustainability action plan and connections to volunteer opportunities with Nagpur-based environmental organisations."},
+      26:{p1:"AI Conference Bangalore 2026 at Bangalore University is a landmark gathering of AI researchers, startup founders, and enterprise technology leaders exploring the frontiers of artificial intelligence in India. Sessions range from foundational deep learning theory to applied AI in healthcare diagnostics, autonomous vehicles, and financial fraud detection.",p2:"The conference will feature speakers from Google DeepMind India, IISc, and top Bengaluru AI startups, along with research paper presentations, poster sessions, and a live AI demo zone. It promises to be one of South India's most comprehensive AI events of the year."},
+      27:{p1:"Startup Expo Bangalore 2026 at Bangalore University is a three-day entrepreneurship exposition where 50+ student and early-stage startups showcase innovations across EdTech, AgriTech, HealthTech, and SaaS. Each startup gets a dedicated booth, pitch slot, and access to Bangalore's vibrant investor community.",p2:"Visitors can interact with live product demos, attend founder masterclasses on go-to-market strategies, and participate in an investor speed-dating session. Last edition's expo helped three participating startups close their seed rounds within six months of the event."},
+      28:{p1:"CodeFest Bangalore 2026 at Bangalore University is South India's most competitive collegiate hackathon — a 30-hour sprint where teams tackle real-world problems posed by Bangalore's tech unicorns. Problem statements span full-stack development, machine learning, cloud infrastructure, and mobile application design.",p2:"The event takes place in Bangalore University's state-of-the-art computer science labs. Prizes include internship offers, cash awards totalling ₹2 lakh, and direct interview invites from companies like Flipkart, Swiggy, and Zepto targeting the top three teams."},
+      29:{p1:"Design Thinking 2026 at Bangalore University is a structured two-day seminar and workshop series introducing the human-centred design process to engineers, business students, and social innovators. Facilitators from IDEO's Bangalore studio and Infosys product teams will guide participants through empathy mapping, problem framing, and rapid prototyping.",p2:"Teams work on real client briefs — this edition's challenge comes from a Bangalore-based accessibility NGO seeking better assistive technology solutions. Case studies from Apple, Airbnb, and Indian unicorns on how design thinking drove product breakthroughs round out this inspiring programme."},
+      30:{p1:"BioTech Conclave 2026 at BITS Pilani Bangalore is a specialised conference for life sciences and biomedical engineering students and professionals. Cutting-edge topics include CRISPR gene editing, mRNA vaccine technology, synthetic biology, and bioinformatics applications in personalised medicine and drug discovery.",p2:"Researchers from IISc, NCBS, and major Bangalore biopharma companies will present their work, followed by Q&A sessions moderated by BITS faculty. A student research competition awards the best poster and oral presentation with publication support in a peer-reviewed journal."},
+      31:{p1:"HackDelhi 2025 was Delhi's premier 24-hour student hackathon at Delhi University, attracting over 400 participants from 60+ institutions across North India. Problem statements focused on smart governance, public health tech, and sustainable urban mobility — themes directly relevant to Delhi's unique urban challenges.",p2:"This event has successfully concluded. The winning team built a real-time air quality monitoring dashboard integrated with DPCC data, earning them a ₹75,000 prize and a pilot partnership with Delhi's IT department. Watch their demo on the EventSphere YouTube channel."},
+      32:{p1:"Startup Summit Delhi 2026 at Delhi University is the capital's flagship entrepreneurship summit, bringing North India's most ambitious founders, investors, and innovation ecosystem builders together for two days of insights, connections, and inspiration across deep tech, social impact, and consumer startups.",p2:"Highlights include the Delhi Startup Awards recognising 10 outstanding ventures, a venture showcase featuring 25 investment-ready startups, and a masterclass series with founders who have built companies from IIT Delhi hostels to global markets. Limited tickets ensure high-quality interactions."},
+      33:{p1:"Cultural Carnival Delhi 2026 at Delhi University is a spectacular two-day festival celebrating the cultural mosaic of India's capital. Performances feature Kathak, Qawwali, folk music from Haryana and Punjab, stand-up comedy, and a digital art installation exploring Delhi's rich Mughal and British heritage.",p2:"The seminar track features historians, urban planners, and cultural critics discussing how megacities preserve identity amid rapid modernisation. Street food from Old Delhi, craft bazaars, and a heritage walk through the university campus round out this immersive cultural experience."},
+      34:{p1:"Data Science Bootcamp Delhi 2026 at IIT Delhi is an intensive four-day programme for students and early professionals wanting to build a solid foundation in data science. The curriculum covers statistical thinking, Python for data analysis, SQL for data wrangling, machine learning with scikit-learn, and data visualisation with Tableau.",p2:"Each day ends with a guided project session, so participants graduate with four portfolio projects demonstrating real skills. IIT Delhi alumni working as data scientists at top firms will lead guest lectures, and the final day features a mini datathon with cash prizes for the best insights."},
+      35:{p1:"Youth Leadership Summit 2026 at JNU Delhi is a transformative two-day seminar bringing together India's most motivated young leaders — student union presidents, grassroots activists, young politicians, and social entrepreneurs — to exchange ideas on shaping a more equitable and progressive India.",p2:"Structured around governance, social justice, climate action, and technology for good, the summit features workshops on public speaking, community organising, and policy advocacy. Delegates leave with lifelong connections, a personal leadership development plan, and the confidence to drive real change."}
+    };
+
+    // All 35 events
+    const ALL_EVENTS=[
+      {event_id:1,title:'AI ML Summit 2025',date:'2026-03-30T10:00:00',venue:'Pune University',city:'Pune',category:'Technical',status:'Upcoming',registered_count:93,capacity:150,image_url:'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=800&q=80',},
+      {event_id:2,title:'Cricket League Pune 2025',date:'2026-04-13T08:00:00',venue:'Pune University',city:'Pune',category:'Sports',status:'Upcoming',registered_count:228,capacity:250,image_url:'https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=800&q=80',},
+      {event_id:3,title:'Startup Pitch Fest 2026',date:'2026-04-27T11:00:00',venue:'Pune University',city:'Pune',category:'Workshop',status:'Upcoming',registered_count:124,capacity:350,image_url:'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&q=80',},
+      {event_id:4,title:'Web3 Seminar 2026',date:'2026-05-04T14:00:00',venue:'Pune University',city:'Pune',category:'Cultural',status:'Upcoming',registered_count:6,capacity:400,image_url:'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=800&q=80',},
+      {event_id:5,title:'Python Bootcamp 2026',date:'2026-05-11T09:00:00',venue:'Pune University',city:'Pune',category:'Workshop',status:'Upcoming',registered_count:174,capacity:450,image_url:'https://images.unsplash.com/photo-1526379879527-8559ecfcaec0?w=800&q=80',},
+      {event_id:6,title:'HackPune 2026',date:'2026-05-18T10:00:00',venue:'Pune University',city:'Pune',category:'Technical',status:'Upcoming',registered_count:230,capacity:500,image_url:'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&q=80',},
+      {event_id:7,title:'Rangmanch Fest 2026',date:'2026-05-25T17:00:00',venue:'Pune University',city:'Pune',category:'Seminar',status:'Upcoming',registered_count:63,capacity:550,image_url:'https://images.unsplash.com/photo-1518834107812-67b0b7c58434?w=800&q=80',},
+      {event_id:8,title:'National Debate 2025',date:'2026-03-30T10:00:00',venue:'MIT Pune',city:'Pune',category:'Seminar',status:'Completed',registered_count:67,capacity:150,image_url:'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&q=80',},
+      {event_id:9,title:'Cybersecurity Summit 2026',date:'2026-06-01T11:00:00',venue:'MIT Pune',city:'Pune',category:'Technical',status:'Upcoming',registered_count:45,capacity:200,image_url:'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&q=80',},
+      {event_id:10,title:'Cultural Fiesta Pune 2026',date:'2026-06-08T16:00:00',venue:'Symbiosis Pune',city:'Pune',category:'Cultural',status:'Upcoming',registered_count:182,capacity:300,image_url:'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80',},
+      {event_id:11,title:'Mumbai Marathon 2025',date:'2026-04-13T08:00:00',venue:'Mumbai University',city:'Mumbai',category:'Sports',status:'Upcoming',registered_count:113,capacity:250,image_url:'https://images.unsplash.com/photo-1452626038306-9aae5e071dd3?w=800&q=80',},
+      {event_id:12,title:'Neon Nights 2026',date:'2026-04-20T19:00:00',venue:'Mumbai University',city:'Mumbai',category:'Seminar',status:'Upcoming',registered_count:13,capacity:300,image_url:'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=800&q=80',},
+      {event_id:13,title:'IoT Expo 2026',date:'2026-04-27T11:00:00',venue:'Mumbai University',city:'Mumbai',category:'Technical',status:'Upcoming',registered_count:310,capacity:350,image_url:'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80',},
+      {event_id:14,title:'Design Workshop 2026',date:'2026-05-04T14:00:00',venue:'Mumbai University',city:'Mumbai',category:'Workshop',status:'Upcoming',registered_count:308,capacity:400,image_url:'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=80',},
+      {event_id:15,title:'DevOps Summit 2026',date:'2026-05-11T09:00:00',venue:'Mumbai University',city:'Mumbai',category:'Technical',status:'Upcoming',registered_count:285,capacity:450,image_url:'https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?w=800&q=80',},
+      {event_id:16,title:'CodeStorm 2026',date:'2026-05-18T10:00:00',venue:'Mumbai University',city:'Mumbai',category:'Workshop',status:'Upcoming',registered_count:375,capacity:500,image_url:'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80',},
+      {event_id:17,title:'Ignite 2026',date:'2026-05-25T17:00:00',venue:'Mumbai University',city:'Mumbai',category:'Seminar',status:'Upcoming',registered_count:471,capacity:550,image_url:'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=800&q=80',},
+      {event_id:18,title:'Music Mela 2026',date:'2026-06-01T11:00:00',venue:'VJTI Mumbai',city:'Mumbai',category:'Cultural',status:'Upcoming',registered_count:200,capacity:400,image_url:'https://images.unsplash.com/photo-1501612780327-45045538702b?w=800&q=80',},
+      {event_id:19,title:'Blockchain Workshop 2026',date:'2026-06-08T16:00:00',venue:'IIT Bombay',city:'Mumbai',category:'Workshop',status:'Upcoming',registered_count:88,capacity:150,image_url:'https://images.unsplash.com/photo-1621416894569-0f39ed31d247?w=800&q=80',},
+      {event_id:20,title:'Sports Carnival Mumbai',date:'2026-06-15T08:00:00',venue:'SIES Mumbai',city:'Mumbai',category:'Sports',status:'Upcoming',registered_count:150,capacity:350,image_url:'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&q=80',},
+      {event_id:21,title:'Orange City Hackathon 2026',date:'2026-03-30T10:00:00',venue:'Nagpur University',city:'Nagpur',category:'Hackathon',status:'Upcoming',registered_count:30,capacity:150,image_url:'https://images.unsplash.com/photo-1607798748738-b15c40d33d57?w=800&q=80',},
+      {event_id:22,title:'Innovation Workshop 2026',date:'2026-04-13T08:00:00',venue:'Nagpur University',city:'Nagpur',category:'Workshop',status:'Upcoming',registered_count:174,capacity:250,image_url:'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80',},
+      {event_id:23,title:'Nagpur Cultural Fest 2026',date:'2026-04-20T19:00:00',venue:'Nagpur University',city:'Nagpur',category:'Seminar',status:'Upcoming',registered_count:165,capacity:300,image_url:'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&q=80',},
+      {event_id:24,title:'TechTalks Nagpur 2026',date:'2026-04-27T11:00:00',venue:'VNIT Nagpur',city:'Nagpur',category:'Technical',status:'Upcoming',registered_count:80,capacity:200,image_url:'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80',},
+      {event_id:25,title:'Green Earth Summit 2026',date:'2026-05-04T14:00:00',venue:'RCOEM Nagpur',city:'Nagpur',category:'Seminar',status:'Upcoming',registered_count:55,capacity:180,image_url:'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80',},
+      {event_id:26,title:'AI Conference Bangalore 2026',date:'2026-03-30T10:00:00',venue:'Bangalore University',city:'Bangalore',category:'Technical',status:'Upcoming',registered_count:130,capacity:150,image_url:'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&q=80',},
+      {event_id:27,title:'Startup Expo Bangalore 2026',date:'2026-04-06T10:00:00',venue:'Bangalore University',city:'Bangalore',category:'Workshop',status:'Upcoming',registered_count:133,capacity:200,image_url:'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=80',},
+      {event_id:28,title:'CodeFest Bangalore 2026',date:'2026-04-13T08:00:00',venue:'Bangalore University',city:'Bangalore',category:'Hackathon',status:'Upcoming',registered_count:231,capacity:250,image_url:'https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=800&q=80',},
+      {event_id:29,title:'Design Thinking 2026',date:'2026-04-20T19:00:00',venue:'Bangalore University',city:'Bangalore',category:'Seminar',status:'Upcoming',registered_count:163,capacity:300,image_url:'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=800&q=80',},
+      {event_id:30,title:'BioTech Conclave 2026',date:'2026-04-27T11:00:00',venue:'BITS Pilani Bangalore',city:'Bangalore',category:'Technical',status:'Upcoming',registered_count:70,capacity:180,image_url:'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=800&q=80',},
+      {event_id:31,title:'HackDelhi 2025',date:'2026-03-30T10:00:00',venue:'Delhi University',city:'Delhi',category:'Hackathon',status:'Completed',registered_count:46,capacity:150,image_url:'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=800&q=80',},
+      {event_id:32,title:'Startup Summit Delhi 2026',date:'2026-04-13T08:00:00',venue:'Delhi University',city:'Delhi',category:'Workshop',status:'Upcoming',registered_count:12,capacity:250,image_url:'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80',},
+      {event_id:33,title:'Cultural Carnival Delhi 2026',date:'2026-04-20T19:00:00',venue:'Delhi University',city:'Delhi',category:'Cultural',status:'Upcoming',registered_count:76,capacity:300,image_url:'https://images.unsplash.com/photo-1567359781514-3b964e2b04d6?w=800&q=80',},
+      {event_id:34,title:'Data Science Bootcamp Delhi',date:'2026-04-27T11:00:00',venue:'IIT Delhi',city:'Delhi',category:'Workshop',status:'Upcoming',registered_count:95,capacity:200,image_url:'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80',},
+      {event_id:35,title:'Youth Leadership Summit',date:'2026-05-04T14:00:00',venue:'JNU Delhi',city:'Delhi',category:'Seminar',status:'Upcoming',registered_count:140,capacity:250,image_url:'https://images.unsplash.com/photo-1529070538774-1843cb3265df?w=800&q=80',},
+    ];
+
+    function pad(n){return String(n).padStart(2,'0');}
+
+    function startCountdown(targetDate){
+      function tick(){
+        const now=new Date(),diff=new Date(targetDate)-now;
+        if(diff<=0){['cdDays','cdHours','cdMins','cdSecs'].forEach(id=>document.getElementById(id).textContent='00');return;}
+        const days=Math.floor(diff/86400000),hours=Math.floor((diff%86400000)/3600000),mins=Math.floor((diff%3600000)/60000),secs=Math.floor((diff%60000)/1000);
+        document.getElementById('cdDays').textContent=pad(days);
+        document.getElementById('cdHours').textContent=pad(hours);
+        document.getElementById('cdMins').textContent=pad(mins);
+        document.getElementById('cdSecs').textContent=pad(secs);
+      }
+      tick(); setInterval(tick,1000);
+    }
+
+    function loadEvent(){
+      const params=new URLSearchParams(window.location.search);
+      const id=parseInt(params.get('id'))||1;
+      let ev=ALL_EVENTS.find(e=>e.event_id===id)||ALL_EVENTS[0];
+      const BURL_EV = localStorage.getItem('backendURL')||(window.location.port==='5000'||window.location.port==='3000'?'':'http://localhost:5000');
+      fetch(`${BURL_EV}/api/events/${id}`).then(r=>r.ok?r.json():null).then(data=>{if(data)ev=data;renderEvent(ev);}).catch(()=>renderEvent(ev));
+    }
+
+    function renderEvent(ev){
+      document.title=`${ev.title} – EventSphere`;
+      document.getElementById('heroTitle').textContent=ev.title;
+      document.getElementById('heroLocation').textContent=`${ev.venue}, ${ev.city}`;
+      document.getElementById('statusBadge').textContent=ev.status;
+      document.getElementById('statusBadge').className=`badge badge-status ${ev.status.toLowerCase()}`;
+      document.getElementById('categoryBadge').textContent=ev.category;
+      document.getElementById('heroImg').src = ev.image_url || ev.image || imageMap[ev.category] || imageMap.default;
+
+      const d=new Date(ev.date);
+      document.getElementById('eventDate').textContent=d.toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
+      document.getElementById('eventTime').textContent=d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+      document.getElementById('eventVenue').textContent=ev.venue;
+      document.getElementById('eventCity').textContent=ev.city;
+
+      // Use unique description if available, else fall back to generic
+      const desc=DESC[ev.event_id]||DESC[ev.id]||DESC[parseInt(ev.event_id)]||DESC[parseInt(ev.id)];
+      if(desc){
+        document.getElementById('eventDesc1').textContent=desc.p1;
+        document.getElementById('eventDesc2').textContent=desc.p2;
+      } else {
+        document.getElementById('eventDesc1').textContent=ev.description||`Join us for the ${ev.title} taking place at ${ev.venue} in ${ev.city}. This is a premier ${(ev.category||'').toLowerCase()} event bringing together enthusiasts, professionals, and students from all over the country. Get ready to experience insightful sessions, engaging activities, and unparalleled networking opportunities.`;
+        document.getElementById('eventDesc2').textContent=`Don't miss out on the chance to connect with like-minded individuals and industry leaders. Secure your spot now and be part of this incredible journey.`;
+      }
+
+      const pct=Math.min(100,Math.round((ev.registered_count/ev.capacity)*100));
+      const remaining=ev.capacity-ev.registered_count;
+      document.getElementById('seatsCount').textContent=`${ev.registered_count} / ${ev.capacity}`;
+      document.getElementById('progressFill').style.width=pct+'%';
+      if(pct>=90)document.getElementById('progressFill').classList.add('full');
+      document.getElementById('seatsRemaining').textContent=`${remaining} seats remaining`;
+
+      const regBtn=document.getElementById('regBtn');
+      const user=JSON.parse(localStorage.getItem('user')||'null');
+      if(remaining<=0){regBtn.textContent='Event Full';regBtn.className='btn-register full';}
+      else if(ev.status==='Completed'){regBtn.textContent='Event Completed';regBtn.className='btn-register full';}
+      else if(user){
+        localStorage.setItem('regEventName',ev.title);
+        localStorage.setItem('regEventCity',ev.city);
+        regBtn.textContent='Register Now';
+        regBtn.href=`register.html?id=${ev.event_id||ev.id}`;
+      } else {
+        regBtn.textContent='Login to Register';
+        regBtn.href=`login.html`;
+      }
+
+      // Logged-in nav
+      if(user&&user.name){
+        const navRight=document.querySelector('.nav-right');
+        const navLinks=document.querySelector('.nav-links');
+        navRight.innerHTML=`
+          <button class="dark-toggle" onclick="(()=>{const isDark=document.documentElement.getAttribute('data-theme')==='dark';if(isDark){document.documentElement.removeAttribute('data-theme');localStorage.setItem('theme','light');}else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem('theme','dark');}})()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+          <div style="display:flex;align-items:center;gap:6px;font-size:14px;font-weight:500;color:var(--text-dark)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F5A623" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            ${user.name}
+          </div>
+          <button onclick="localStorage.removeItem('token');localStorage.removeItem('user');window.location.href='index.html'" style="background:none;border:none;cursor:pointer;font-size:14px;font-weight:600;color:#dc3545;font-family:'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;gap:5px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Logout
+          </button>`;
+        if(!navLinks.querySelector('a[href="dashboard.html"]')){
+          const li=document.createElement('li');li.innerHTML='<a href="dashboard.html">Dashboard</a>';navLinks.appendChild(li);
+          if(user.role==='admin'){const la=document.createElement('li');la.innerHTML='<a href="admin.html" style="color:var(--orange);font-weight:700;">Admin</a>';navLinks.appendChild(la);}
+        }
+      }
+
+      startCountdown(ev.date);
+      // Set global and build payment/reg area
+      CURRENT_EVENT = ev;
+      var currentUser = JSON.parse(localStorage.getItem('user')||'null');
+      buildRegArea(ev, currentUser);
+    }
+
+    // Smart back link — remember where user came from
+    (function(){
+      const ref = document.referrer;
+      const backLink = document.getElementById('backLink');
+      if(ref && ref.includes('index.html')){
+        backLink.href = 'index.html';
+        backLink.querySelector('svg').nextSibling.textContent = ' Back to Home';
+        backLink.lastChild.textContent = ' Back to Home';
+      } else {
+        backLink.href = 'events.html';
+      }
+      // Store last page in sessionStorage for reliability
+      const lastPage = sessionStorage.getItem('lastPage');
+      if(lastPage === 'home'){
+        backLink.href = 'index.html';
+      } else {
+        backLink.href = 'events.html';
+      }
+    })();
+
+
+// ── PAYMENT & REGISTRATION FLOW ────────────────────────────────────────────
+var CURRENT_EVENT = null;
+var BURL_DETAIL = localStorage.getItem('backendURL')||(window.location.port==='5000'||window.location.port==='3000'?'':'http://localhost:5000');
+var RZP_KEY = 'rzp_test_demo'; // updated dynamically
+
+function buildRegArea(ev, user) {
+  var area = document.getElementById('regActionArea');
+  var remaining = ev.capacity - ev.registered_count;
+  
+  if (remaining <= 0) {
+    area.innerHTML = '<div class="btn-register full" style="padding:13px;text-align:center;background:#6c757d;color:#fff;border-radius:10px;font-weight:700;">Event Full</div>';
+    return;
+  }
+  if (ev.status === 'Completed') {
+    area.innerHTML = '<div class="btn-register full" style="padding:13px;text-align:center;background:#6c757d;color:#fff;border-radius:10px;font-weight:700;">Event Completed</div>';
+    return;
+  }
+  if (!user) {
+    area.innerHTML = '<a href="login.html" class="btn-register">Login to Register</a>';
+    return;
+  }
+
+  // Check if already registered — will be updated after API check below
+  // (Real check happens via /api/registrations/my later; this is just local fast-path)
+  var alreadyRegs = JSON.parse(localStorage.getItem('userRegistrations')||'[]');
+  var alreadyReg = alreadyRegs.find(function(r){return String(r.event_id)===String(ev.event_id);});
+  if (alreadyReg) {
+    area.innerHTML = '<div class="already-reg">✅ You are registered!<br><small style="font-weight:500;color:#555;font-size:12px;">Booking: '+alreadyReg.booking_id+'</small></div>';
+    return;
+  }
+
+  // Determine price
+  var price = getPriceForEvent(ev);
+  var html = '<div class="pay-section">';
+
+  // Show EXACTLY ONE badge — either FREE or PAID, never both
+  if (price > 0) {
+    html += '<div style="margin-bottom:12px"><span style="display:inline-flex;align-items:center;gap:5px;background:#fff3cd;color:#856404;font-size:12px;font-weight:700;padding:5px 12px;border-radius:50px;border:1px solid #ffc107">💰 PAID EVENT</span></div>';
+    html += '<div class="price-row"><span class="price-label">Registration Fee</span><span class="price-val">₹'+price+'</span></div>';
+    html += '<button class="btn-pay" id="payBtn" onclick="startPayment()">🎟️ Register Now — Pay ₹'+price+'</button>';
+    html += '<div class="pay-note">🔒 Test mode — Any card details accepted · OTP: <strong>123456</strong></div>';
+  } else {
+    html += '<div style="margin-bottom:12px"><span style="display:inline-flex;align-items:center;gap:5px;background:#d1fae5;color:#065f46;font-size:12px;font-weight:700;padding:5px 12px;border-radius:50px;border:1px solid #6ee7b7">✅ FREE EVENT</span></div>';
+    html += '<div class="price-row"><span class="price-label">Registration Fee</span><span class="price-free">FREE</span></div>';
+    html += '<button class="btn-register" onclick="registerFree()">🎟️ Register Now — Free</button>';
+  }
+
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function getPriceForEvent(ev) {
+  // Use actual DB fields first
+  if (ev.is_paid == 1 && ev.registration_fee > 0) return ev.registration_fee;
+  if (ev.is_paid == 1) {
+    var priceMap = { Technical: 299, Workshop: 499, Hackathon: 199, Seminar: 149, Cultural: 99, Sports: 79 };
+    return priceMap[ev.category] || 199;
+  }
+  return 0;
+}
+
+async function registerFree() {
+  var user = null;
+  try { user = JSON.parse(localStorage.getItem('user')||'null'); } catch(e) {}
+  if (!user) { window.location.href='login.html'; return; }
+  var token = localStorage.getItem('token')||'';
+  if (!token) { showRegToast('Please login again to register.'); window.location.href='login.html'; return; }
+  var btn = document.querySelector('#regActionArea button');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Registering…'; }
+  try {
+    var res = await fetch(BURL_DETAIL+'/api/registrations', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+token },
+      body: JSON.stringify({ event_id: CURRENT_EVENT.event_id, requirements: '' })
+    });
+    var data = await res.json();
+    if (res.ok) {
+      sessionStorage.setItem('lastRegistration', JSON.stringify(data));
+      var regs = JSON.parse(localStorage.getItem('userRegistrations')||'[]');
+      regs.push({ event_id: CURRENT_EVENT.event_id, booking_id: data.booking_id });
+      localStorage.setItem('userRegistrations', JSON.stringify(regs));
+      window.location.href = 'success.html';
+    } else if (res.status === 409) {
+      showRegToast('You are already registered for this event! ✅');
+      if (btn) { btn.disabled=false; btn.textContent='🎟️ Register Now — Free'; }
+    } else if (res.status === 401) {
+      showRegToast('Session expired. Please login again.');
+      setTimeout(function(){ window.location.href='login.html'; }, 1500);
+    } else {
+      showRegToast(data.message || 'Registration failed. Please try again.');
+      if (btn) { btn.disabled=false; btn.textContent='🎟️ Register Now — Free'; }
+    }
+  } catch(e) {
+    showRegToast('Cannot reach server. Make sure backend is running.');
+    if (btn) { btn.disabled=false; btn.textContent='🎟️ Register Now — Free'; }
+  }
+}
+
+async function startPayment() {
+  var user = null;
+  try { user = JSON.parse(localStorage.getItem('user')||'null'); } catch(e) {}
+  if (!user) { window.location.href='login.html'; return; }
+  var token = localStorage.getItem('token')||'';
+  if (!token) { window.location.href='login.html'; return; }
+  var btn = document.getElementById('payBtn');
+  if (btn) { btn.disabled=true; btn.textContent='⏳ Processing…'; }
+  var price = getPriceForEvent(CURRENT_EVENT);
+  // Always use mock payment modal in test/development mode
+  // This avoids the confusing real Razorpay UI with test cards
+  await showMockOTPModal(price);
+}
+
+// ── MOCK PAYMENT MODAL (Test Mode) ─────────────────────────────────────────
+// Shows a clean card payment UI. Any card details are accepted in test mode.
+// OTP step uses fixed code 123456 — no real charge ever made.
+function showMockOTPModal(price) {
+  return new Promise(function(resolve) {
+    var existing = document.getElementById('mockPayModal');
+    if (existing) existing.remove();
+
+    var modal = document.createElement('div');
+    modal.id = 'mockPayModal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:16px;';
+
+    modal.innerHTML = `
+      <div style="background:#fff;border-radius:16px;width:100%;max-width:420px;box-shadow:0 24px 80px rgba(0,0,0,0.3);overflow:hidden;">
+        <!-- Header -->
+        <div style="background:linear-gradient(135deg,#F5A623,#E09400);padding:18px 22px;display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.85);font-weight:600;letter-spacing:1px;text-transform:uppercase;">EventSphere Payment</div>
+            <div style="font-size:22px;font-weight:800;color:#fff;margin-top:2px;">₹${price || 0}</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.2);border-radius:8px;padding:6px 10px;font-size:11px;font-weight:700;color:#fff;">🧪 TEST MODE</div>
+        </div>
+
+        <!-- Step 1: Card Details (shown first) -->
+        <div id="mpStep1" style="padding:22px;">
+          <div style="font-size:14px;font-weight:700;color:#1A1A2E;margin-bottom:16px;">💳 Enter Card Details</div>
+
+          <div style="background:#FFF8EE;border:1px solid #FFE4A0;border-radius:8px;padding:10px 12px;font-size:12px;color:#92400E;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+            <span style="font-size:16px;">🧪</span>
+            <span>Test mode — use any card details. No real charge.</span>
+          </div>
+
+          <div style="margin-bottom:12px;">
+            <label style="display:block;font-size:12px;font-weight:600;color:#555;margin-bottom:5px;">Card Number</label>
+            <input id="mpCardNum" type="text" maxlength="19" placeholder="1234 5678 9012 3456"
+              style="width:100%;padding:11px 14px;border:1.5px solid #E2E6EA;border-radius:9px;font-size:15px;letter-spacing:2px;outline:none;font-family:inherit;color:#1A1A2E;"
+              oninput="var raw=this.value.replace(/[^0-9]/g,String()).slice(0,16);var parts=[];for(var j=0;j<raw.length;j+=4)parts.push(raw.slice(j,j+4));this.value=parts.join(' ');" />
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+            <div>
+              <label style="display:block;font-size:12px;font-weight:600;color:#555;margin-bottom:5px;">Expiry (MM/YY)</label>
+              <input id="mpExpiry" type="text" maxlength="5" placeholder="MM/YY"
+                style="width:100%;padding:11px 14px;border:1.5px solid #E2E6EA;border-radius:9px;font-size:15px;outline:none;font-family:inherit;color:#1A1A2E;"
+                oninput="
+  var pos=this.selectionStart;
+  var v=this.value.replace(/[^0-9]/g,'').slice(0,4);
+  if(v.length>2) v=v.slice(0,2)+'/'+v.slice(2);
+  this.value=v;
+"
+              />
+            </div>
+            <div>
+              <label style="display:block;font-size:12px;font-weight:600;color:#555;margin-bottom:5px;">CVV</label>
+              <input id="mpCvv" type="password" maxlength="4" placeholder="•••"
+                style="width:100%;padding:11px 14px;border:1.5px solid #E2E6EA;border-radius:9px;font-size:15px;outline:none;font-family:inherit;color:#1A1A2E;"
+                oninput="this.value=this.value.replace(/\D/g,'');"
+              />
+            </div>
+          </div>
+          <div id="mpCardErr" style="color:#dc2626;font-size:12px;margin-bottom:10px;display:none;"></div>
+
+          <div style="display:flex;gap:10px;">
+            <button onclick="closeMockPay()" style="flex:1;padding:12px;border:1.5px solid #E2E6EA;border-radius:9px;background:#fff;color:#555;font-size:14px;font-weight:600;cursor:pointer;">Cancel</button>
+            <button onclick="mpProceedToOTP()" style="flex:2;padding:12px;border:none;border-radius:9px;background:#F5A623;color:#fff;font-size:14px;font-weight:700;cursor:pointer;">Continue →</button>
+          </div>
+          <div style="text-align:center;margin-top:12px;font-size:11px;color:#aaa;">🔒 Secured · Test mode · No real charge</div>
+        </div>
+
+        <!-- Step 2: OTP (hidden initially) -->
+        <div id="mpStep2" style="padding:22px;display:none;">
+          <div style="text-align:center;margin-bottom:16px;">
+            <div style="font-size:36px;margin-bottom:8px;">📱</div>
+            <div style="font-size:15px;font-weight:700;color:#1A1A2E;">OTP Verification</div>
+            <div style="font-size:12px;color:#888;margin-top:4px;">Enter the 6-digit OTP sent to your mobile</div>
+          </div>
+
+          <div style="background:#EEF9EE;border:1px solid #BBF7D0;border-radius:8px;padding:12px;text-align:center;margin-bottom:16px;">
+            <div style="font-size:11px;color:#166534;font-weight:600;margin-bottom:4px;">🧪 TEST OTP</div>
+            <div style="font-size:28px;font-weight:900;letter-spacing:8px;color:#16a34a;">123456</div>
+          </div>
+
+          <div style="margin-bottom:12px;">
+            <input id="mpOtpInput" type="text" maxlength="6" placeholder="Enter 6-digit OTP"
+              style="width:100%;padding:14px;border:2px solid #E2E6EA;border-radius:9px;font-size:24px;text-align:center;letter-spacing:8px;font-weight:700;outline:none;font-family:inherit;color:#1A1A2E;"
+              oninput="this.value=this.value.replace(/[^0-9]/g,'');document.getElementById('mpOtpErr').style.display='none';if(this.value.length===6)mpVerifyOTP();"
+            />
+            <div id="mpOtpErr" style="color:#dc2626;font-size:12px;margin-top:6px;display:none;text-align:center;">❌ Invalid OTP. Enter 123456 for test mode.</div>
+          </div>
+
+          <div style="display:flex;gap:10px;">
+            <button onclick="document.getElementById('mpStep1').style.display='block';document.getElementById('mpStep2').style.display='none';"
+              style="flex:1;padding:12px;border:1.5px solid #E2E6EA;border-radius:9px;background:#fff;color:#555;font-size:14px;font-weight:600;cursor:pointer;">← Back</button>
+            <button onclick="mpVerifyOTP()" style="flex:2;padding:12px;border:none;border-radius:9px;background:#16a34a;color:#fff;font-size:14px;font-weight:700;cursor:pointer;">✅ Verify & Pay</button>
+          </div>
+        </div>
+      </div>`;
+
+    document.body.appendChild(modal);
+    setTimeout(function(){ var inp=document.getElementById('mpCardNum'); if(inp) inp.focus(); }, 100);
+    window._mockPayResolve = resolve;
+  });
+}
+
+function closeMockPay() {
+  var m = document.getElementById('mockPayModal');
+  if (m) m.remove();
+  var btn = document.getElementById('payBtn');
+  if (btn) { btn.disabled=false; btn.innerHTML='🎟️ Register Now — Pay ₹'+(CURRENT_EVENT ? getPriceForEvent(CURRENT_EVENT) : ''); }
+  if (window._mockPayResolve) { window._mockPayResolve(); delete window._mockPayResolve; }
+}
+
+function mpProceedToOTP() {
+  var cardNum = (document.getElementById('mpCardNum')||{value:''}).value.replace(/\s/g,'');
+  var expiry  = (document.getElementById('mpExpiry') ||{value:''}).value;
+  var cvv     = (document.getElementById('mpCvv')    ||{value:''}).value;
+  var errEl   = document.getElementById('mpCardErr');
+
+  // Validate — any 13-19 digit card, MM/YY expiry, 3-4 digit CVV accepted in test mode
+  if (cardNum.length < 13) {
+    if(errEl){errEl.textContent='Please enter a valid card number.';errEl.style.display='block';} return;
+  }
+  // Accept MM/YY format (allow any valid looking date)
+  var expiryClean = expiry.replace(/[^0-9\/]/g,'');
+  if (expiryClean.length < 4 || !expiryClean.includes('/')) {
+    if(errEl){errEl.textContent='Enter expiry as MM/YY (e.g. 12/26).';errEl.style.display='block';} return;
+  }
+  if (cvv.length < 3) {
+    if(errEl){errEl.textContent='Enter a valid CVV (3-4 digits).';errEl.style.display='block';} return;
+  }
+  if(errEl) errEl.style.display='none';
+
+  // Move to OTP step
+  document.getElementById('mpStep1').style.display='none';
+  document.getElementById('mpStep2').style.display='block';
+  setTimeout(function(){ var inp=document.getElementById('mpOtpInput'); if(inp) inp.focus(); }, 100);
+}
+
+async function mpVerifyOTP() {
+  var input = document.getElementById('mpOtpInput');
+  var errEl = document.getElementById('mpOtpErr');
+  var otp = input ? input.value.trim() : '';
+
+  if (otp !== '123456') {
+    if(errEl) errEl.style.display='block';
+    if(input) { input.style.borderColor='#dc2626'; input.focus(); }
+    return;
+  }
+
+  // Success — remove modal and complete registration
+  var modal = document.getElementById('mockPayModal');
+  if (modal) modal.remove();
+
+  await completeRegistration('TEST-PAY-' + Date.now());
+  if (window._mockPayResolve) { window._mockPayResolve(); delete window._mockPayResolve; }
+}
+
+
+async function completeRegistration(paymentId) {
+  var token = localStorage.getItem('token')||'';
+  var btn = document.getElementById('payBtn');
+  try {
+    var res = await fetch(BURL_DETAIL+'/api/registrations', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+token },
+      body: JSON.stringify({ event_id: CURRENT_EVENT.event_id, requirements: paymentId ? 'Payment: '+paymentId : '' })
+    });
+    var data = await res.json();
+    if (res.ok) {
+      sessionStorage.setItem('lastRegistration', JSON.stringify(data));
+      var regs = JSON.parse(localStorage.getItem('userRegistrations')||'[]');
+      regs.push({ event_id: CURRENT_EVENT.event_id, booking_id: data.booking_id });
+      localStorage.setItem('userRegistrations', JSON.stringify(regs));
+      window.location.href = 'success.html';
+    } else if (res.status === 409) {
+      showRegToast('You are already registered for this event! ✅');
+      if (btn) { btn.disabled=false; btn.textContent='🎟️ Register Now'; }
+    } else if (res.status === 401) {
+      showRegToast('Session expired. Please login again.');
+      setTimeout(function(){ window.location.href='login.html'; }, 1500);
+    } else {
+      showRegToast(data.message || 'Registration failed. Please try again.');
+      if (btn) { btn.disabled=false; btn.textContent='🎟️ Register Now'; }
+    }
+  } catch(e) {
+    showRegToast('Cannot reach server. Make sure backend is running on port 5000.');
+    if (btn) { btn.disabled=false; btn.textContent='🎟️ Register Now'; }
+  }
+}
+
+// Toast helper for registration area
+function showRegToast(msg) {
+  var t = document.getElementById('es-reg-toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'es-reg-toast';
+    t.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:#1A1A2E;color:#fff;padding:12px 24px;border-radius:10px;font-family:inherit;font-size:14px;font-weight:600;z-index:9999;transition:transform 0.3s;white-space:nowrap;max-width:90vw;text-align:center;';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  setTimeout(function(){ t.style.transform='translateX(-50%) translateY(0)'; }, 10);
+  setTimeout(function(){ t.style.transform='translateX(-50%) translateY(80px)'; }, 3000);
+}
+
+// Store current event for payment functions
+var origRenderEvent = typeof renderEvent === 'function' ? renderEvent : null;
+
+    loadEvent();
+  
+    // ── Update nav for logged-in user ──────────────────────
+    (function updateNav() {
+      const user = JSON.parse(localStorage.getItem('user') || 'null');
+      if (!user || !user.name) return;
+
+      const navRight = document.querySelector('.nav-right');
+      if (!navRight) return;
+
+      // Build logged-in nav
+      const sunSVGn = `<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>`;
+      const moonSVGn = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
+      const isDarkNow = document.documentElement.getAttribute('data-theme') === 'dark';
+
+      navRight.innerHTML = `
+        <button class="dark-toggle" id="darkToggle2" title="Toggle dark mode">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${isDarkNow ? sunSVGn : moonSVGn}</svg>
+        </button>
+        <div style="display:flex;align-items:center;gap:6px;font-size:14px;font-weight:500;color:var(--text-dark)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--orange,#F5A623)" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span>${user.name}</span>
+        </div>
+        <button onclick="doNavLogout()" style="background:none;border:none;cursor:pointer;font-size:13.5px;font-weight:600;color:#dc3545;font-family:inherit;display:flex;align-items:center;gap:5px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Logout
+        </button>`;
+
+      // Re-attach dark toggle
+      const dt2 = document.getElementById('darkToggle2');
+      if (dt2) {
+        dt2.addEventListener('click', () => {
+          const html = document.documentElement;
+          const dark = html.getAttribute('data-theme') === 'dark';
+          const icon = dt2.querySelector('svg');
+          if (dark) { html.removeAttribute('data-theme'); icon.innerHTML = moonSVGn; localStorage.setItem('theme','light'); }
+          else { html.setAttribute('data-theme','dark'); icon.innerHTML = sunSVGn; localStorage.setItem('theme','dark'); }
+        });
+      }
+
+      // Add Dashboard link
+      const navLinks = document.querySelector('.nav-links');
+      if (navLinks && !navLinks.querySelector('a[href="dashboard.html"]')) {
+        const li = document.createElement('li');
+        li.innerHTML = '<a href="dashboard.html">Dashboard</a>';
+        navLinks.appendChild(li);
+      }
+      // Add Admin link if admin
+      if (navLinks && user.role === 'admin' && !navLinks.querySelector('a[href="admin.html"]')) {
+        const la = document.createElement('li');
+        la.innerHTML = '<a href="admin.html" style="color:var(--orange,#F5A623);font-weight:700">Admin</a>';
+        navLinks.appendChild(la);
+      }
+    })();
+
+    function doNavLogout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = 'index.html';
+    }
+
+    // ── Scroll to Top ──────────────────────────────────────
+    window.addEventListener('scroll', () => {
+      const btn = document.getElementById('scrollTopBtn');
+      if(btn) btn.classList.toggle('show', window.scrollY > 300);
+    });
+
+    // ── Mobile Menu ────────────────────────────────────────
+    function openMobileMenu() {
+      document.getElementById('mobileMenu').classList.add('open');
+    }
+    function closeMobileMenu(e) {
+      if(e.target === document.getElementById('mobileMenu'))
+        document.getElementById('mobileMenu').classList.remove('open');
+    }
+    // Update mobile menu based on login state
+    (function() {
+      const u = JSON.parse(localStorage.getItem('user')||'null');
+      if(u && u.name) {
+        const dbLink = document.getElementById('mobileDbLink');
+        const logoutBtn = document.getElementById('mobileLogoutBtn');
+        const loginLink = document.getElementById('mobileLoginLink');
+        const signupLink = document.getElementById('mobileSignupLink');
+        const adminLink = document.getElementById('mobileAdminLink');
+        if(dbLink) dbLink.style.display='block';
+        if(logoutBtn) logoutBtn.style.display='block';
+        if(loginLink) loginLink.style.display='none';
+        if(signupLink) signupLink.style.display='none';
+        if(adminLink && u.role==='admin') adminLink.style.display='block';
+      }
+    })();
+
+    // ── NEW v4 features ──────────────────────────────────────────────────────
+    (async function() {
+      const params   = new URLSearchParams(location.search);
+      const eventId  = params.get('id');
+      if (!eventId) return;
+
+      const token = localStorage.getItem('token');
+      const user  = (() => { try { return JSON.parse(atob(token.split('.')[1])); } catch(e) { return null; } })();
+
+      let ev = null;
+      try {
+        const r = await fetch(apiUrl('/api/events/'+eventId));
+        ev = await r.json();
+      } catch(e) { return; }
+
+      const extra = document.getElementById('extraDetails');
+      let html = '';
+
+      // Paid/Free badge — only shown if event explicitly has is_paid set from DB
+      // (Static fallback events handled by getPriceForEvent; don't double-show)
+
+      // Tags
+      if (ev.tags && ev.tags.trim()) {
+        const tags = ev.tags.split(',').map(t=>t.trim()).filter(Boolean);
+        html += `<div class="section-label" style="margin-top:14px">🏷 Tags</div><div>${tags.map(t=>`<span class="pill-badge pill-tag">${t}</span>`).join('')}</div>`;
+      }
+
+      // Skills
+      if (ev.skills_required && ev.skills_required.trim()) {
+        const skills = ev.skills_required.split(',').map(s=>s.trim()).filter(Boolean);
+        html += `<div class="section-label">🛠 Skills Needed</div><div>${skills.map(s=>`<span class="pill-badge pill-skill">${s}</span>`).join('')}</div>`;
+      }
+
+      // External Registration Link
+      if (ev.external_link && ev.external_link.trim()) {
+        html += `<div class="section-label" style="margin-top:14px">🔗 External Registration</div>
+          <a href="${ev.external_link}" target="_blank" rel="noopener"
+            style="display:inline-flex;align-items:center;gap:7px;background:#EBF4FF;color:#2563EB;padding:9px 16px;border-radius:9px;font-size:13.5px;font-weight:700;text-decoration:none;margin-top:4px;border:1px solid #BFDBFE;">
+            Register on External Site →
+          </a>`;
+      }
+
+      // Google Map Embed
+      if (ev.map_embed && ev.map_embed.trim()) {
+        html += `<div class="section-label" style="margin-top:18px">📍 Venue Map</div>
+          <div style="border-radius:12px;overflow:hidden;margin-top:8px;border:1px solid #E2E6EA;">
+            <iframe src="${ev.map_embed}" width="100%" height="260" style="border:0;display:block;" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          </div>`;
+      } else if (ev.venue && ev.city) {
+        // Auto-generate Google Maps embed from venue + city if no custom embed provided
+        const mapQ = encodeURIComponent((ev.venue||'') + ', ' + (ev.city||'') + ', India');
+        html += `<div class="section-label" style="margin-top:18px">📍 Venue Location</div>
+          <div style="border-radius:12px;overflow:hidden;margin-top:8px;border:1px solid #E2E6EA;">
+            <iframe src="https://maps.google.com/maps?q=${mapQ}&output=embed&z=15" width="100%" height="260" style="border:0;display:block;" allowfullscreen loading="lazy"></iframe>
+          </div>`;
+      }
+
+      extra.innerHTML = html;
+
+      // External link
+      if (ev.external_link && ev.external_link.trim()) {
+        const area = document.getElementById('regActionArea');
+        const extBtn = document.createElement('a');
+        extBtn.href   = ev.external_link;
+        extBtn.target = '_blank';
+        extBtn.rel    = 'noopener noreferrer';
+        extBtn.className = 'ext-link-btn';
+        extBtn.textContent = '🔗 Register on Unstop / Devfolio →';
+        area.appendChild(extBtn);
+      }
+
+      // Map embed
+      if (ev.map_embed && ev.map_embed.trim()) {
+        const mapDiv = document.createElement('div');
+        mapDiv.innerHTML = `<div class="section-label" style="margin-top:16px">📍 Location</div><div class="map-embed-wrap">${ev.map_embed}</div>`;
+        extra.appendChild(mapDiv);
+      }
+
+      if (!token || !user) return;
+
+      // Check if user is registered
+      let isRegistered = false;
+      let regId = null;
+      try {
+        const r = await fetch(apiUrl('/api/registrations/my'), { headers:{Authorization:'Bearer '+token} });
+        const d = await r.json();
+        const found = (d.registrations||[]).find(x=>String(x.event_id)===String(eventId));
+        if (found) { isRegistered=true; regId=found.registration_id; }
+      } catch(e) {}
+
+      // Check waitlist
+      let onWaitlist = false;
+      if (!isRegistered) {
+        try {
+          const r = await fetch(apiUrl('/api/waitlist/my'), { headers:{Authorization:'Bearer '+token} });
+          const d = await r.json();
+          onWaitlist = (d.waitlist||[]).some(x=>String(x.event_id)===String(eventId));
+        } catch(e) {}
+      }
+
+      const area = document.getElementById('regActionArea');
+      const isFull = ev.registered_count >= ev.capacity;
+
+      // If already registered: rebuild regActionArea cleanly to show confirmed state
+      if (isRegistered) {
+        area.innerHTML = `<div class="already-reg">✅ You are registered!<br><small style="font-weight:500;color:#555;font-size:12px;">Registration confirmed</small></div>`;
+        // Add share button
+        const shareBtn2 = document.createElement('button');
+        shareBtn2.className = 'btn-outline';
+        shareBtn2.textContent = '🔗 Share Event';
+        shareBtn2.style.marginTop = '10px';
+        shareBtn2.onclick = async function() {
+          const url = location.href;
+          try {
+            if (navigator.share) { await navigator.share({ title: ev.title, text: 'Check out this event!', url }); }
+            else { await navigator.clipboard.writeText(url); showToast('🔗 Link copied!'); }
+          } catch(e) { try { await navigator.clipboard.writeText(url); showToast('🔗 Link copied!'); } catch(e2){} }
+        };
+        area.appendChild(shareBtn2);
+        // Certificate for completed events
+        if (ev.status === 'Completed') {
+          const certBtn = document.createElement('a');
+          certBtn.className = 'btn-outline';
+          certBtn.style.cssText = 'border-color:#C8951A;color:#C8951A;margin-top:10px;display:block;text-align:center;padding:10px;border-radius:10px;text-decoration:none;font-weight:700;';
+          const certUrl = `certificate.html?event=${encodeURIComponent(ev.title)}&user=${encodeURIComponent(user.name)}&date=${encodeURIComponent(ev.date||'')}&city=${encodeURIComponent(ev.city)}&cat=${encodeURIComponent(ev.category)}&id=CERT-${regId}`;
+          certBtn.href = certUrl;
+          certBtn.textContent = '🏆 Download Certificate';
+          area.appendChild(certBtn);
+        }
+        return; // Don't add more buttons
+      }
+
+      // Waitlist button (only if not registered and event is full)
+      if (isFull && ev.status !== 'Completed') {
+        const wlBtn = document.createElement('button');
+        wlBtn.className = 'btn-waitlist' + (onWaitlist ? ' on-list' : '');
+        wlBtn.textContent = onWaitlist ? '✓ On Waitlist (click to leave)' : '📋 Join Waitlist';
+        wlBtn.onclick = async function() {
+          const method = onWaitlist ? 'DELETE' : 'POST';
+          try {
+            const r = await fetch(apiUrl('/api/waitlist/'+eventId), { method, headers:{Authorization:'Bearer '+token} });
+            const d = await r.json();
+            onWaitlist = !onWaitlist;
+            wlBtn.className = 'btn-waitlist' + (onWaitlist ? ' on-list' : '');
+            wlBtn.textContent = onWaitlist ? '✓ On Waitlist (click to leave)' : '📋 Join Waitlist';
+            showToast(d.message);
+          } catch(e) { showToast('Error — please try again.'); }
+        };
+        area.appendChild(wlBtn);
+      }
+
+      // Share button (only for non-registered, non-full events)
+      if (!isFull && ev.status !== 'Completed') {
+        const shareBtn = document.createElement('button');
+        shareBtn.className = 'btn-outline';
+        shareBtn.textContent = '🔗 Share Event';
+        shareBtn.style.marginTop = '8px';
+        shareBtn.onclick = async function() {
+          const url = location.href;
+          const shareData = { title: ev.title, text: '🎯 Check out '+ev.title+' in '+ev.city+' on EventSphere!', url };
+          try {
+            if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+              await navigator.share(shareData);
+            } else {
+              await navigator.clipboard.writeText(url);
+              showToast('🔗 Link copied to clipboard!');
+            }
+          } catch(e) {
+            try { await navigator.clipboard.writeText(url); showToast('🔗 Link copied!'); } catch(e2) {}
+          }
+        };
+        area.appendChild(shareBtn);
+      }
+
+      // Paid event handler: intercept register button → show mock payment modal
+      const regBtn = document.getElementById('regBtn');
+      if (ev.is_paid && regBtn && ev.status !== 'Completed') {
+        regBtn.onclick = async function(e) {
+          e.preventDefault();
+          // Use mock payment modal (test mode — no real Razorpay)
+          await showMockOTPModal(ev.registration_fee || 0);
+        };
+      }
+
+      async function doRegister() {
+        try {
+          const r = await fetch(apiUrl('/api/registrations'), {
+            method:'POST',
+            headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
+            body: JSON.stringify({ event_id: eventId })
+          });
+          const d = await r.json();
+          if (d.waitlisted) { showToast(d.message); return; }
+          if (r.ok) { location.href=`success.html?reg=${d.registration_id}&event=${encodeURIComponent(ev.title)}`; }
+          else { showToast(d.message||'Registration failed.'); }
+        } catch(e) { showToast('Error — please try again.'); }
+      }
+
+      function showToast(msg) {
+        let t=document.getElementById('es-detail-toast');
+        if(!t){t=document.createElement('div');t.id='es-detail-toast';Object.assign(t.style,{position:'fixed',bottom:'28px',left:'50%',transform:'translateX(-50%) translateY(80px)',background:'#1A1A2E',color:'#fff',padding:'12px 24px',borderRadius:'10px',fontFamily:'inherit',fontSize:'14px',fontWeight:'600',zIndex:'9999',transition:'transform 0.3s',whiteSpace:'nowrap'});document.body.appendChild(t);}
+        t.textContent=msg;
+        setTimeout(()=>{t.style.transform='translateX(-50%) translateY(0)';},10);
+        setTimeout(()=>{t.style.transform='translateX(-50%) translateY(80px)';},2600);
+      }
+    })();
+  </script>
+  <script src="chatbot.js"></script>
+</body>
+
+</html>

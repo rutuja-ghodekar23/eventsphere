@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Explore Events – EventSphere</title>
+  <link rel="manifest" href="manifest.json"/>
+  <meta name="theme-color" content="#F5A623"/>
+  <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});</script>
+  <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --orange: #F5A623;
+      --orange-dark: #E09400;
+      --text-dark: #1A1A2E;
+      --text-mid: #444;
+      --text-light: #888;
+      --bg-white: #FFFFFF;
+      --bg-light: #F9F9F9;
+      --border: #E8E8E8;
+      --shadow: 0 4px 24px rgba(0,0,0,0.07);
+      --shadow-hover: 0 12px 40px rgba(0,0,0,0.13);
+      --radius: 16px;
+      --radius-sm: 10px;
+      --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
+    }
+    [data-theme="dark"] {
+      --text-dark: #F0F0F0; --text-mid: #CCCCCC; --text-light: #999;
+      --bg-white: #121212; --bg-light: #1A1A1A; --border: #2A2A2A;
+      --shadow: 0 4px 24px rgba(0,0,0,0.4); --shadow-hover: 0 12px 40px rgba(0,0,0,0.6);
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg-white); color: var(--text-dark);
+      transition: background var(--transition), color var(--transition);
+    }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--bg-white); border-bottom: 1px solid var(--border);
+      padding: 0 48px; height: 64px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .nav-logo {
+      display:flex; align-items:center; gap:8px; text-decoration:none;
+      font-family:'Clash Display',sans-serif; font-weight:700; font-size:20px; color:var(--text-dark);
+    }
+    .nav-logo svg { color:var(--orange); }
+    .nav-links { display:flex; align-items:center; gap:36px; list-style:none; }
+    .nav-links a {
+      text-decoration:none; font-size:14.5px; font-weight:500;
+      color:var(--text-mid); transition:color var(--transition);
+    }
+    .nav-links a.active { color:var(--orange); font-weight:600; }
+    .nav-links a:hover { color:var(--orange); }
+    .nav-right { display:flex; align-items:center; gap:16px; }
+    .dark-toggle {
+      background:none; border:none; cursor:pointer; color:var(--text-mid);
+      padding:6px; border-radius:50%; display:flex; align-items:center;
+      transition:background var(--transition),color var(--transition);
+    }
+    .dark-toggle:hover { color:var(--orange); }
+    .btn-login {
+      background:none; border:none; cursor:pointer; font-size:14.5px;
+      font-weight:500; color:var(--text-dark); font-family:'Plus Jakarta Sans',sans-serif;
+      transition:color var(--transition);
+    }
+    .btn-login:hover { color:var(--orange); }
+    .btn-signup {
+      background:var(--orange); color:#fff; border:none;
+      border-radius:var(--radius-sm); padding:9px 22px;
+      font-size:14px; font-weight:600; cursor:pointer;
+      font-family:'Plus Jakarta Sans',sans-serif;
+      box-shadow:0 4px 16px rgba(245,166,35,0.3);
+      transition:background var(--transition),transform var(--transition);
+    }
+    .btn-signup:hover { background:var(--orange-dark); transform:translateY(-1px); }
+
+    /* PAGE HEADER */
+    .page-header {
+      padding: 52px 48px 0;
+      animation: fadeUp 0.6s ease both;
+    }
+    .page-header h1 {
+      font-family: 'Clash Display', sans-serif;
+      font-size: 34px; font-weight: 700; color: var(--text-dark);
+      letter-spacing: -0.5px; margin-bottom: 8px;
+    }
+    .page-header p { font-size: 15px; color: var(--text-light); }
+
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(20px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* FILTER BAR */
+    .filter-bar {
+      margin: 30px 48px 36px;
+      background: var(--bg-white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 24px;
+      display: grid;
+      grid-template-columns: 1.6fr 1fr 1fr 1fr;
+      gap: 16px;
+      box-shadow: var(--shadow);
+      transition: background var(--transition), border-color var(--transition);
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+
+    .filter-item {
+      position: relative; display: flex; align-items: center;
+    }
+    .filter-icon {
+      position: absolute; left: 14px; color: #BBBBBB;
+      pointer-events: none; display: flex; align-items: center; z-index:1;
+    }
+    .filter-item input,
+    .filter-item select {
+      width: 100%; padding: 10px 14px 10px 40px;
+      border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+      font-size: 14px; font-family: 'Plus Jakarta Sans', sans-serif;
+      color: var(--text-mid); background: var(--bg-white); outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+      appearance: none;
+    }
+    .filter-item input::placeholder { color: var(--text-light); }
+    .filter-item input:focus, .filter-item select:focus {
+      border-color: var(--orange);
+      box-shadow: 0 0 0 3px rgba(245,166,35,0.1);
+    }
+
+    /* RESULTS INFO */
+    .results-info {
+      padding: 0 48px 20px;
+      font-size: 14px; color: var(--text-light);
+    }
+    .results-info span { color: var(--orange); font-weight: 600; }
+
+    /* GRID */
+    .events-section { padding: 0 48px 72px; }
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+
+    /* CARD */
+    .event-card {
+      background: var(--bg-white); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: box-shadow var(--transition), transform var(--transition), border-color var(--transition), background var(--transition);
+      animation: fadeUp 0.5s ease both;
+    }
+    .event-card:hover { transform:translateY(-5px); box-shadow:var(--shadow-hover); border-color:rgba(245,166,35,0.25); }
+
+    .card-img { position:relative; height:180px; overflow:hidden; background:#1a1a2e; }
+    .card-img img { width:100%; height:100%; object-fit:cover; transition:transform 0.5s ease; }
+    .event-card:hover .card-img img { transform:scale(1.06); }
+    .card-img.no-img { background:linear-gradient(135deg,#2c2c3e,#1a1a2e); }
+
+    .card-badges { position:absolute; top:12px; left:12px; display:flex; gap:6px; }
+    .badge { padding:4px 11px; border-radius:50px; font-size:11.5px; font-weight:600; letter-spacing:0.2px; }
+    .badge-status { background:var(--orange); color:#fff !important; }
+    .badge-status.upcoming { background:var(--orange); color:#fff !important; }
+    .badge-status.completed, .badge-status.past { background:#6c757d; color:#fff !important; }
+    .badge-status.ongoing   { background:#28a745; color:#fff !important; }
+    .badge-category { background:rgba(255,255,255,0.92); color:#1A1A2E !important; backdrop-filter:blur(4px); }
+    [data-theme="dark"] .badge-category { background:rgba(255,255,255,0.15); color:#fff !important; }
+    .badge-free { background:#16a34a; color:#fff !important; }
+    .badge-paid { background:#7c3aed; color:#fff !important; }
+
+    .card-body { padding:16px 18px 18px; }
+    .card-body h3 {
+      font-family:'Clash Display',sans-serif; font-size:16px; font-weight:700;
+      color:var(--text-dark); margin-bottom:10px; letter-spacing:-0.2px;
+      line-height:1.3;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .card-meta { display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
+    .card-meta-item { display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--text-mid); }
+    .card-meta-item svg { color:var(--orange); flex-shrink:0; }
+
+    .progress-section { margin-bottom:14px; }
+    .progress-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+    .progress-label { font-size:11.5px; color:var(--text-light); font-weight:500; }
+    .progress-count { font-size:11.5px; color:var(--text-mid); font-weight:600; }
+    .progress-bar-bg { height:5px; background:#F0F0F0; border-radius:50px; overflow:hidden; }
+    [data-theme="dark"] .progress-bar-bg { background:#2a2a2a; }
+    .progress-bar-fill { height:100%; border-radius:50px; background:var(--orange); transition:width 1s ease; }
+    .progress-bar-fill.full { background:#dc3545; }
+
+    .btn-details {
+      display:block; width:100%; padding:9px;
+      background:transparent; border:1.5px solid var(--orange); color:var(--orange);
+      border-radius:var(--radius-sm); font-size:13.5px; font-weight:600;
+      font-family:'Plus Jakarta Sans',sans-serif; cursor:pointer;
+      text-align:center; text-decoration:none;
+      transition:all var(--transition);
+    }
+    .btn-details:hover { background:var(--orange); color:#fff !important; }
+    [data-theme="dark"] .btn-details { border-color:var(--orange); color:var(--orange); }
+    [data-theme="dark"] .btn-details:hover { background:var(--orange); color:#fff !important; }
+
+    /* EMPTY STATE */
+    .empty-state {
+      grid-column: 1/-1; text-align:center; padding:60px 0;
+      color:var(--text-light); font-size:15px;
+    }
+    .empty-state svg { margin-bottom:16px; opacity:0.4; }
+
+    /* FOOTER */
+    footer {
+      background:var(--bg-white); border-top:1px solid var(--border);
+      padding:24px 48px; display:flex; align-items:center; justify-content:space-between;
+      transition:background var(--transition), border-color var(--transition);
+    }
+    .footer-logo { display:flex; align-items:center; gap:8px; font-family:'Clash Display',sans-serif; font-weight:700; font-size:17px; color:var(--text-dark); text-decoration:none; }
+    .footer-logo svg { color:var(--orange); }
+    .footer-copy { font-size:13.5px; color:var(--text-light); }
+    .footer-links { display:flex; gap:24px; }
+    .footer-links a { font-size:13.5px; color:var(--text-mid); text-decoration:none; transition:color var(--transition); }
+    .footer-links a:hover { color:var(--orange); }
+
+    @media (max-width:1200px) { .cards-grid { grid-template-columns:repeat(3,1fr); } .filter-bar { grid-template-columns:1.4fr 1fr 1fr 1fr; } }
+    @media (max-width:900px)  { .cards-grid { grid-template-columns:repeat(2,1fr); } .filter-bar { grid-template-columns:1fr 1fr; } }
+    @media (max-width:600px)  { nav{padding:0 20px;} .nav-links{display:none;} .page-header,.filter-bar,.events-section,.results-info{margin-left:0;margin-right:0;padding-left:16px;padding-right:16px;} .cards-grid{grid-template-columns:1fr;} .filter-bar{grid-template-columns:1fr;} footer{flex-direction:column;gap:12px;text-align:center;padding:20px;} }
+  
+    /* ── SCROLL TO TOP BUTTON ── */
+    #scrollTopBtn{position:fixed;bottom:150px;right:24px;width:44px;height:44px;background:var(--orange,#F5A623);color:#fff;border:none;border-radius:50%;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(245,166,35,0.4);z-index:400;transition:all 0.3s;font-size:18px;}
+    #scrollTopBtn:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(245,166,35,0.5);}
+    #scrollTopBtn.show{display:flex;}
+
+    /* ── MOBILE HAMBURGER ── */
+    .hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:6px;}
+    .hamburger span{display:block;width:22px;height:2px;background:var(--text-dark,#1A1A2E);border-radius:2px;transition:all 0.3s;}
+    .mobile-menu{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;}
+    .mobile-menu.open{display:block;}
+    .mobile-menu-inner{position:absolute;right:0;top:0;bottom:0;width:260px;background:var(--bg-white,#fff);padding:24px;display:flex;flex-direction:column;gap:0;box-shadow:-4px 0 24px rgba(0,0,0,0.15);}
+    .mobile-menu-inner .close-btn{align-self:flex-end;background:none;border:none;font-size:22px;cursor:pointer;color:var(--text-dark,#1A1A2E);margin-bottom:16px;}
+    .mobile-menu-inner a,.mobile-menu-inner button{display:block;padding:14px 0;font-size:16px;font-weight:600;color:var(--text-dark,#1A1A2E);text-decoration:none;border-bottom:1px solid var(--border,#E8E8E8);background:none;border-top:none;border-left:none;border-right:none;text-align:left;cursor:pointer;font-family:inherit;}
+    .mobile-menu-inner a:hover{color:var(--orange,#F5A623);}
+    @media(max-width:768px){.hamburger{display:flex;}.nav-links{display:none !important;}.nav-right .btn-login,.nav-right .btn-signup{display:none;}}
+    
+    /* ── SMOOTH EXPERIENCE ── */
+    html { scroll-behavior: smooth; }
+    * { -webkit-tap-highlight-color: transparent; }
+    a, button { transition: all 0.22s cubic-bezier(0.4,0,0.2,1); }
+    img { transition: opacity 0.3s ease; }
+
+    /* ══ AI CHATBOT ══════════════════════════════════════════════════════════ */
+    .chat-hdr-txt strong{font-size:14px;font-weight:700;}
+    .chat-hdr-txt span{font-size:11px;opacity:.85;}
+    .chat-close:hover{opacity:1;}
+    .msg-bot,
+    .msg-typing
+    .msg-typing .dot:nth-child(2){animation-delay:.2s;}
+    .msg-typing .dot:nth-child(3){animation-delay:.4s;}
+    @keyframes typingBounce{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-6px);}}
+    .chat-inp:focus{border-color:var(--orange);}
+    .chat-send:hover{background:var(--orange-dark,#d4891e);}
+    .chat-send:disabled{opacity:.5;cursor:not-allowed;}
+    @media(max-width:400px){}
+    /* ════════════════════════════════════════════════════════════════════════ */
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="index.html" class="nav-logo">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      EventSphere
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="events.html" class="active">Events</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="dark-toggle" id="darkToggle">
+        <svg id="darkIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="btn-login" onclick="window.location.href='login.html'">Login</button>
+      <button class="btn-signup" onclick="window.location.href='signup.html'">Sign up</button>
+    </div>
+  </nav>
+
+<!-- Scroll to Top Button -->
+<button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top">↑</button>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu" onclick="closeMobileMenu(event)">
+  <div class="mobile-menu-inner">
+    <button class="close-btn" onclick="document.getElementById('mobileMenu').classList.remove('open')">✕</button>
+    <a href="index.html">🏠 Home</a>
+    <a href="events.html">📅 Events</a>
+    <a href="about.html">ℹ️ About</a>
+    <a href="contact.html">📬 Contact</a>
+    <a href="dashboard.html" id="mobileDbLink" style="display:none">📊 Dashboard</a>
+    <a href="admin.html" id="mobileAdminLink" style="display:none;color:var(--orange,#F5A623)">🛡️ Admin</a>
+    <button onclick="doNavLogout()" id="mobileLogoutBtn" style="display:none;color:#dc3545;padding:14px 0;font-size:16px;font-weight:600;font-family:inherit;background:none;border:none;border-bottom:1px solid var(--border,#E8E8E8);text-align:left;cursor:pointer;">⬡ Logout</button>
+    <a href="login.html" id="mobileLoginLink">🔐 Login</a>
+    <a href="signup.html" id="mobileSignupLink" style="color:var(--orange,#F5A623)">✍️ Sign Up</a>
+  </div>
+</div>
+
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <h1>Explore Events</h1>
+    <p>Find your next technical summit, cultural fest, or workshop.</p>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <div class="filter-item">
+      <span class="filter-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </span>
+      <input type="text" id="searchInput" placeholder="Search by name or college…" oninput="filterEvents()"/>
+    </div>
+    <div class="filter-item">
+      <span class="filter-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      </span>
+      <select id="cityFilter" onchange="filterEvents()">
+        <option value="">All Cities</option>
+        <option value="Pune">Pune</option>
+        <option value="Mumbai">Mumbai</option>
+        <option value="Nagpur">Nagpur</option>
+        <option value="Bangalore">Bangalore</option>
+        <option value="Delhi">Delhi</option>
+      </select>
+    </div>
+    <div class="filter-item">
+      <span class="filter-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+      </span>
+      <select id="categoryFilter" onchange="filterEvents()">
+        <option value="">All Categories</option>
+        <option value="Technical">Technical</option>
+        <option value="Cultural">Cultural</option>
+        <option value="Sports">Sports</option>
+        <option value="Workshop">Workshop</option>
+        <option value="Seminar">Seminar</option>
+        <option value="Hackathon">Hackathon</option>
+      </select>
+    </div>
+    <div class="filter-item">
+      <span class="filter-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      </span>
+      <select id="statusFilter" onchange="filterEvents()">
+        <option value="">All Statuses</option>
+        <option value="Upcoming">Upcoming</option>
+        <option value="Ongoing">Ongoing</option>
+        <option value="Completed">Completed</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- RESULTS COUNT -->
+  <div class="results-info">
+    Showing <span id="resultCount">35</span> events
+  </div>
+
+  <!-- EVENTS GRID -->
+  <div class="events-section">
+    <div class="cards-grid" id="eventsGrid"></div>
+    <!-- Pagination -->
+    <div id="paginationWrap" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:32px;flex-wrap:wrap;"></div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <a href="index.html" class="footer-logo">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      EventSphere
+    </a>
+    <p class="footer-copy">© 2026 EventSphere. All rights reserved.</p>
+    <div class="footer-links">
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </footer>
+
+  <script>
+    // Auto-detect backend URL (works from Live Server AND localhost:5000)
+    const BURL = localStorage.getItem('backendURL') ||
+      (window.location.port === '5000' || window.location.port === '3000' ? '' : 'http://localhost:5000');
+    function apiUrl(path){ return BURL + path; }
+
+    // Dark mode
+    const toggle = document.getElementById('darkToggle');
+    const icon   = document.getElementById('darkIcon');
+    const html   = document.documentElement;
+    const sunSVG  = `<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>`;
+    const moonSVG = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
+    if (localStorage.getItem('theme') === 'dark') { html.setAttribute('data-theme','dark'); icon.innerHTML = sunSVG; }
+    toggle.addEventListener('click', () => {
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      if (isDark) { html.removeAttribute('data-theme'); icon.innerHTML = moonSVG; localStorage.setItem('theme','light'); }
+      else { html.setAttribute('data-theme','dark'); icon.innerHTML = sunSVG; localStorage.setItem('theme','dark'); }
+    });
+
+    // Image map
+    const imageMap = {
+      'Technical':  'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=500&q=75',
+      'Workshop':   'https://images.unsplash.com/photo-1558008258-3256797b43f3?w=500&q=75',
+      'Cultural':   'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=500&q=75',
+      'Sports':     'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&q=75',
+      'Seminar':    'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=500&q=75',
+      'Hackathon':  'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=500&q=75',
+      'default':    'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=500&q=75'
+    };
+
+    function getImage(cat) { return imageMap[cat] || imageMap['default']; }
+
+    function formatDate(d) {
+      const dt = new Date(d);
+      return dt.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) + ' – ' + dt.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    }
+
+    // All 35 events
+    const ALL_EVENTS = [
+      // Pune (10)
+      {event_id:1,  title:'AI ML Summit 2025',       date:'2026-03-30T10:00:00', venue:'Pune University',     city:'Pune',      category:'Technical', status:'Upcoming',  registered_count:93,  capacity:150,image_url:'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=800&q=80',},
+      {event_id:2,  title:'Cricket League Pune 2025', date:'2026-04-13T08:00:00', venue:'Pune University',     city:'Pune',      category:'Sports',    status:'Upcoming',  registered_count:228, capacity:250,image_url:'https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=800&q=80',},
+      {event_id:3,  title:'Startup Pitch Fest 2026',  date:'2026-04-27T11:00:00', venue:'Pune University',     city:'Pune',      category:'Workshop',  status:'Upcoming',  registered_count:124, capacity:350,image_url:'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&q=80',},
+      {event_id:4,  title:'Web3 Seminar 2026',        date:'2026-05-04T14:00:00', venue:'Pune University',     city:'Pune',      category:'Cultural',  status:'Upcoming',  registered_count:6,   capacity:400,image_url:'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=800&q=80',},
+      {event_id:5,  title:'Python Bootcamp 2026',     date:'2026-05-11T09:00:00', venue:'Pune University',     city:'Pune',      category:'Workshop',  status:'Upcoming',  registered_count:174, capacity:450,image_url:'https://images.unsplash.com/photo-1526379879527-8559ecfcaec0?w=800&q=80',},
+      {event_id:6,  title:'HackPune 2026',            date:'2026-05-18T10:00:00', venue:'Pune University',     city:'Pune',      category:'Technical', status:'Upcoming',  registered_count:230, capacity:500,image_url:'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&q=80',},
+      {event_id:7,  title:'Rangmanch Fest 2026',      date:'2026-05-25T17:00:00', venue:'Pune University',     city:'Pune',      category:'Seminar',   status:'Upcoming',  registered_count:63,  capacity:550,image_url:'https://images.unsplash.com/photo-1518834107812-67b0b7c58434?w=800&q=80',},
+      {event_id:8,  title:'National Debate 2025',     date:'2026-03-30T10:00:00', venue:'MIT Pune',            city:'Pune',      category:'Seminar',   status:'Completed', registered_count:67,  capacity:150,image_url:'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&q=80',},
+      {event_id:9,  title:'Cybersecurity Summit 2026',date:'2026-06-01T11:00:00', venue:'MIT Pune',            city:'Pune',      category:'Technical', status:'Upcoming',  registered_count:45,  capacity:200,image_url:'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&q=80',},
+      {event_id:10, title:'Cultural Fiesta Pune 2026',date:'2026-06-08T16:00:00', venue:'Symbiosis Pune',      city:'Pune',      category:'Cultural',  status:'Upcoming',  registered_count:182, capacity:300,image_url:'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80',},
+      // Mumbai (10)
+      {event_id:11, title:'Mumbai Marathon 2025',     date:'2026-04-13T08:00:00', venue:'Mumbai University',   city:'Mumbai',    category:'Sports',    status:'Upcoming',  registered_count:113, capacity:250,image_url:'https://images.unsplash.com/photo-1452626038306-9aae5e071dd3?w=800&q=80',},
+      {event_id:12, title:'Neon Nights 2026',         date:'2026-04-20T19:00:00', venue:'Mumbai University',   city:'Mumbai',    category:'Seminar',   status:'Upcoming',  registered_count:13,  capacity:300,image_url:'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=800&q=80',},
+      {event_id:13, title:'IoT Expo 2026',            date:'2026-04-27T11:00:00', venue:'Mumbai University',   city:'Mumbai',    category:'Technical', status:'Upcoming',  registered_count:310, capacity:350,image_url:'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80',},
+      {event_id:14, title:'Design Workshop 2026',     date:'2026-05-04T14:00:00', venue:'Mumbai University',   city:'Mumbai',    category:'Workshop',  status:'Upcoming',  registered_count:308, capacity:400,image_url:'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=80',},
+      {event_id:15, title:'DevOps Summit 2026',       date:'2026-05-11T09:00:00', venue:'Mumbai University',   city:'Mumbai',    category:'Sports',    status:'Upcoming',  registered_count:285, capacity:450,image_url:'https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?w=800&q=80',},
+      {event_id:16, title:'CodeStorm 2026',           date:'2026-05-18T10:00:00', venue:'Mumbai University',   city:'Mumbai',    category:'Workshop',  status:'Upcoming',  registered_count:375, capacity:500,image_url:'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80',},
+      {event_id:17, title:'Ignite 2026',              date:'2026-05-25T17:00:00', venue:'Mumbai University',   city:'Mumbai',    category:'Seminar',   status:'Upcoming',  registered_count:471, capacity:550,image_url:'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=800&q=80',},
+      {event_id:18, title:'Music Mela 2026',          date:'2026-06-01T11:00:00', venue:'VJTI Mumbai',         city:'Mumbai',    category:'Cultural',  status:'Upcoming',  registered_count:200, capacity:400,image_url:'https://images.unsplash.com/photo-1501612780327-45045538702b?w=800&q=80',},
+      {event_id:19, title:'Blockchain Workshop 2026', date:'2026-06-08T16:00:00', venue:'IIT Bombay',          city:'Mumbai',    category:'Workshop',  status:'Upcoming',  registered_count:88,  capacity:150,image_url:'https://images.unsplash.com/photo-1621416894569-0f39ed31d247?w=800&q=80',},
+      {event_id:20, title:'Sports Carnival Mumbai',   date:'2026-06-15T08:00:00', venue:'SIES Mumbai',         city:'Mumbai',    category:'Sports',    status:'Upcoming',  registered_count:150, capacity:350,image_url:'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&q=80',},
+      // Nagpur (5)
+      {event_id:21, title:'Orange City Hackathon 2026',date:'2026-03-30T10:00:00',venue:'Nagpur University',   city:'Nagpur',    category:'Cultural',  status:'Upcoming',  registered_count:30,  capacity:150,image_url:'https://images.unsplash.com/photo-1607798748738-b15c40d33d57?w=800&q=80',},
+      {event_id:22, title:'Innovation Workshop 2026', date:'2026-04-13T08:00:00', venue:'Nagpur University',   city:'Nagpur',    category:'Workshop',  status:'Upcoming',  registered_count:174, capacity:250,image_url:'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80',},
+      {event_id:23, title:'Nagpur Cultural Fest 2026',date:'2026-04-20T19:00:00', venue:'Nagpur University',   city:'Nagpur',    category:'Seminar',   status:'Upcoming',  registered_count:165, capacity:300,image_url:'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&q=80',},
+      {event_id:24, title:'TechTalks Nagpur 2026',    date:'2026-04-27T11:00:00', venue:'VNIT Nagpur',         city:'Nagpur',    category:'Technical', status:'Upcoming',  registered_count:80,  capacity:200,image_url:'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80',},
+      {event_id:25, title:'Green Earth Summit 2026',  date:'2026-05-04T14:00:00', venue:'RCOEM Nagpur',        city:'Nagpur',    category:'Seminar',   status:'Upcoming',  registered_count:55,  capacity:180,image_url:'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80',},
+      // Bangalore (5)
+      {event_id:26, title:'AI Conference Bangalore 2026',date:'2026-03-30T10:00:00',venue:'Bangalore University',city:'Bangalore',category:'Cultural', status:'Upcoming',  registered_count:130, capacity:150,image_url:'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&q=80',},
+      {event_id:27, title:'Startup Expo Bangalore 2026',date:'2026-04-06T10:00:00', venue:'Bangalore University',city:'Bangalore',category:'Sports',   status:'Upcoming',  registered_count:133, capacity:200,image_url:'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=80',},
+      {event_id:28, title:'CodeFest Bangalore 2026',  date:'2026-04-13T08:00:00', venue:'Bangalore University',city:'Bangalore', category:'Workshop',  status:'Upcoming',  registered_count:231, capacity:250,image_url:'https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=800&q=80',},
+      {event_id:29, title:'Design Thinking 2026',     date:'2026-04-20T19:00:00', venue:'Bangalore University',city:'Bangalore', category:'Seminar',   status:'Upcoming',  registered_count:163, capacity:300,image_url:'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=800&q=80',},
+      {event_id:30, title:'BioTech Conclave 2026',    date:'2026-04-27T11:00:00', venue:'BITS Pilani Bangalore',city:'Bangalore',category:'Technical', status:'Upcoming',  registered_count:70,  capacity:180,image_url:'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=800&q=80',},
+      // Delhi (5)
+      {event_id:31, title:'HackDelhi 2025',           date:'2026-03-30T10:00:00', venue:'Delhi University',    city:'Delhi',     category:'Cultural',  status:'Completed', registered_count:46,  capacity:150,image_url:'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=800&q=80',},
+      {event_id:32, title:'Startup Summit Delhi 2026',date:'2026-04-13T08:00:00', venue:'Delhi University',    city:'Delhi',     category:'Workshop',  status:'Upcoming',  registered_count:12,  capacity:250,image_url:'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80',},
+      {event_id:33, title:'Cultural Carnival Delhi 2026',date:'2026-04-20T19:00:00',venue:'Delhi University',  city:'Delhi',     category:'Seminar',   status:'Upcoming',  registered_count:76,  capacity:300,image_url:'https://images.unsplash.com/photo-1567359781514-3b964e2b04d6?w=800&q=80',},
+      {event_id:34, title:'Data Science Bootcamp Delhi',date:'2026-04-27T11:00:00',venue:'IIT Delhi',          city:'Delhi',     category:'Workshop',  status:'Upcoming',  registered_count:95,  capacity:200,image_url:'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80',},
+      {event_id:35, title:'Youth Leadership Summit',  date:'2026-05-04T14:00:00', venue:'JNU Delhi',           city:'Delhi',     category:'Seminar',   status:'Upcoming',  registered_count:140, capacity:250,image_url:'https://images.unsplash.com/photo-1529070538774-1843cb3265df?w=800&q=80',},
+    ];
+
+    let filteredEvents = [...ALL_EVENTS];
+
+    function renderCards(events) {
+      const grid = document.getElementById('eventsGrid');
+      document.getElementById('resultCount').textContent = events.length;
+
+      if (!events.length) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <p>No events match your filters.<br>Try adjusting the search criteria.</p>
+          </div>`;
+        return;
+      }
+
+      grid.innerHTML = events.map((ev, i) => {
+        const pct  = Math.min(100, Math.round((ev.registered_count / ev.capacity) * 100));
+        const img  = ev.image_url || getImage(ev.category);
+        const full = pct >= 90 ? 'full' : '';
+        const sCls = ev.status.toLowerCase();
+        return `
+          <div class="event-card" style="animation-delay:${Math.min(i,11)*0.05}s">
+            <div class="card-img">
+              <img src="${img}" alt="${ev.title}"
+                   onerror="this.src='https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80'"
+                   style="width:100%;height:100%;object-fit:cover;"/>
+              <div class="card-badges">
+                <span class="badge badge-status ${sCls}">${ev.status}</span>
+                <span class="badge badge-category">${ev.category}</span>
+                <span class="badge ${(ev.is_paid || ev.registration_fee > 0) ? 'badge-paid' : 'badge-free'}">${(ev.is_paid || ev.registration_fee > 0) ? '₹' + (ev.registration_fee || '') + ' Paid' : 'Free'}</span>
+              </div>
+            </div>
+            <div class="card-body">
+              <h3 title="${ev.title}">${ev.title}</h3>
+              <div class="card-meta">
+                <div class="card-meta-item">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  <span>${formatDate(ev.date)}</span>
+                </div>
+                <div class="card-meta-item">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  <span>${ev.venue}, ${ev.city}</span>
+                </div>
+              </div>
+              <div class="progress-section">
+                <div class="progress-header">
+                  <span class="progress-label">Registration Progress</span>
+                  <span class="progress-count">${ev.registered_count} / ${ev.capacity}</span>
+                </div>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill ${full}" style="width:${pct}%"></div>
+                </div>
+              </div>
+              <a href="event-details.html?id=${ev.event_id}" class="btn-details" onclick="sessionStorage.setItem('lastPage','events')">View Details</a>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+
+    // ── PAGINATION STATE ───────────────────────────────────
+    const PAGE_SIZE = 12;
+    let currentPage = 1;
+
+    // ── SORT EVENTS ────────────────────────────────────────
+    function sortEvents(events) {
+      const sort = (document.getElementById('sortSelect') || {}).value || 'newest';
+      const arr = [...events];
+      if (sort === 'newest')    arr.sort((a,b) => (b.event_id||0)-(a.event_id||0));
+      if (sort === 'date_asc')  arr.sort((a,b) => new Date(a.date||0)-new Date(b.date||0));
+      if (sort === 'date_desc') arr.sort((a,b) => new Date(b.date||0)-new Date(a.date||0));
+      if (sort === 'seats')     arr.sort((a,b) => ((b.capacity||0)-(b.registered_count||0))-((a.capacity||0)-(a.registered_count||0)));
+      if (sort === 'popular')   arr.sort((a,b) => (b.registered_count||0)-(a.registered_count||0));
+      return arr;
+    }
+
+    // ── RENDER PAGINATION ──────────────────────────────────
+    function renderPagination(total, currentPg) {
+      const totalPages = Math.ceil(total / PAGE_SIZE);
+      const wrap = document.getElementById('paginationWrap');
+      if (!wrap || totalPages <= 1) { if(wrap) wrap.innerHTML=''; return; }
+
+      const btnStyle = 'padding:8px 14px;border-radius:8px;border:1.5px solid var(--border,#E8E8E8);background:var(--bg-white,#fff);cursor:pointer;font-size:13.5px;font-weight:600;font-family:inherit;color:var(--text-dark,#1A1A2E);transition:all 0.2s;';
+      const activeStyle = 'padding:8px 14px;border-radius:8px;border:1.5px solid #F5A623;background:#F5A623;cursor:pointer;font-size:13.5px;font-weight:700;font-family:inherit;color:#fff;';
+
+      let html = '';
+      // Prev button
+      html += `<button style="${btnStyle}opacity:${currentPg===1?0.4:1}" onclick="goPage(${currentPg-1})" ${currentPg===1?'disabled':''}>← Prev</button>`;
+      // Page numbers
+      for (let i=1; i<=totalPages; i++) {
+        if (i===1 || i===totalPages || Math.abs(i-currentPg)<=1) {
+          html += `<button style="${i===currentPg?activeStyle:btnStyle}" onclick="goPage(${i})">${i}</button>`;
+        } else if (Math.abs(i-currentPg)===2) {
+          html += `<span style="padding:8px 4px;color:var(--text-light,#999)">…</span>`;
+        }
+      }
+      // Next button
+      html += `<button style="${btnStyle}opacity:${currentPg===totalPages?0.4:1}" onclick="goPage(${currentPg+1})" ${currentPg===totalPages?'disabled':''}>Next →</button>`;
+      wrap.innerHTML = html;
+    }
+
+    function goPage(pg) {
+      const totalPages = Math.ceil(filteredEvents.length / PAGE_SIZE);
+      if (pg < 1 || pg > totalPages) return;
+      currentPage = pg;
+      const sorted = sortEvents(filteredEvents);
+      const paginated = sorted.slice((pg-1)*PAGE_SIZE, pg*PAGE_SIZE);
+      renderCards(paginated);
+      renderPagination(filteredEvents.length, pg);
+      window.scrollTo({top: document.querySelector('.events-section').offsetTop - 80, behavior:'smooth'});
+    }
+
+    function filterEvents() {
+      const q    = document.getElementById('searchInput').value.toLowerCase().trim();
+      const city = document.getElementById('cityFilter').value;
+      const cat  = document.getElementById('categoryFilter').value;
+      const stat = document.getElementById('statusFilter').value;
+
+      filteredEvents = ALL_EVENTS.filter(ev => {
+        const matchQ    = !q    || ev.title.toLowerCase().includes(q) || ev.venue.toLowerCase().includes(q) || ev.city.toLowerCase().includes(q);
+        const matchCity = !city || ev.city === city;
+        const matchCat  = !cat  || ev.category === cat;
+        const matchStat = !stat || ev.status === stat;
+        return matchQ && matchCity && matchCat && matchStat;
+      });
+
+      currentPage = 1;
+      const sorted = sortEvents(filteredEvents);
+      const paginated = sorted.slice(0, PAGE_SIZE);
+      renderCards(paginated);
+      renderPagination(filteredEvents.length, 1);
+    }
+
+    // Try API, fallback to static data
+    async function loadEvents() {
+      try {
+        const res = await fetch(apiUrl('/api/events'));
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        const events = data.events || data;
+        if (events && events.length) {
+          ALL_EVENTS.length = 0;
+          // Sort: newest created first (highest event_id = most recently added by admin)
+          events.sort((a, b) => (b.event_id || 0) - (a.event_id || 0));
+          events.forEach(e => ALL_EVENTS.push(e));
+        }
+      } catch (err) {
+        console.warn('API unavailable, using static data:', err.message);
+        // Static fallback already in ALL_EVENTS array above
+      }
+      filterEvents();
+    }
+
+    // Read filter from homepage category click
+    const savedCat = sessionStorage.getItem('filterCategory');
+    if(savedCat) {
+      const catFilter = document.getElementById('categoryFilter');
+      if(catFilter) catFilter.value = savedCat;
+      sessionStorage.removeItem('filterCategory');
+    }
+    loadEvents();
+  
+    // ── Update nav for logged-in user ──────────────────────
+    (function updateNav() {
+      const user = JSON.parse(localStorage.getItem('user') || 'null');
+      if (!user || !user.name) return;
+
+      const navRight = document.querySelector('.nav-right');
+      if (!navRight) return;
+
+      // Build logged-in nav
+      const sunSVGn = `<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>`;
+      const moonSVGn = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
+      const isDarkNow = document.documentElement.getAttribute('data-theme') === 'dark';
+
+      navRight.innerHTML = `
+        <button class="dark-toggle" id="darkToggle2" title="Toggle dark mode">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${isDarkNow ? sunSVGn : moonSVGn}</svg>
+        </button>
+        <div style="display:flex;align-items:center;gap:6px;font-size:14px;font-weight:500;color:var(--text-dark)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--orange,#F5A623)" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span>${user.name}</span>
+        </div>
+        <button onclick="doNavLogout()" style="background:none;border:none;cursor:pointer;font-size:13.5px;font-weight:600;color:#dc3545;font-family:inherit;display:flex;align-items:center;gap:5px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Logout
+        </button>`;
+
+      // Re-attach dark toggle
+      const dt2 = document.getElementById('darkToggle2');
+      if (dt2) {
+        dt2.addEventListener('click', () => {
+          const html = document.documentElement;
+          const dark = html.getAttribute('data-theme') === 'dark';
+          const icon = dt2.querySelector('svg');
+          if (dark) { html.removeAttribute('data-theme'); icon.innerHTML = moonSVGn; localStorage.setItem('theme','light'); }
+          else { html.setAttribute('data-theme','dark'); icon.innerHTML = sunSVGn; localStorage.setItem('theme','dark'); }
+        });
+      }
+
+      // Add Dashboard link
+      const navLinks = document.querySelector('.nav-links');
+      if (navLinks && !navLinks.querySelector('a[href="dashboard.html"]')) {
+        const li = document.createElement('li');
+        li.innerHTML = '<a href="dashboard.html">Dashboard</a>';
+        navLinks.appendChild(li);
+      }
+      // Add Admin link if admin
+      if (navLinks && user.role === 'admin' && !navLinks.querySelector('a[href="admin.html"]')) {
+        const la = document.createElement('li');
+        la.innerHTML = '<a href="admin.html" style="color:var(--orange,#F5A623);font-weight:700">Admin</a>';
+        navLinks.appendChild(la);
+      }
+    })();
+
+    function doNavLogout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = 'index.html';
+    }
+
+    // ── Scroll to Top ──────────────────────────────────────
+    window.addEventListener('scroll', () => {
+      const btn = document.getElementById('scrollTopBtn');
+      if(btn) btn.classList.toggle('show', window.scrollY > 300);
+    });
+
+    // ── Mobile Menu ────────────────────────────────────────
+    function openMobileMenu() {
+      document.getElementById('mobileMenu').classList.add('open');
+    }
+    function closeMobileMenu(e) {
+      if(e.target === document.getElementById('mobileMenu'))
+        document.getElementById('mobileMenu').classList.remove('open');
+    }
+    // Update mobile menu based on login state
+    (function() {
+      const u = JSON.parse(localStorage.getItem('user')||'null');
+      if(u && u.name) {
+        const dbLink = document.getElementById('mobileDbLink');
+        const logoutBtn = document.getElementById('mobileLogoutBtn');
+        const loginLink = document.getElementById('mobileLoginLink');
+        const signupLink = document.getElementById('mobileSignupLink');
+        const adminLink = document.getElementById('mobileAdminLink');
+        if(dbLink) dbLink.style.display='block';
+        if(logoutBtn) logoutBtn.style.display='block';
+        if(loginLink) loginLink.style.display='none';
+        if(signupLink) signupLink.style.display='none';
+        if(adminLink && u.role==='admin') adminLink.style.display='block';
+      }
+    })();
+
+  
+    // Lazy load images with fade-in
+    const imgObserver = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if(e.isIntersecting) { e.target.classList.add('loaded'); imgObserver.unobserve(e.target); } });
+    });
+    document.querySelectorAll('img[loading="lazy"]').forEach(img => imgObserver.observe(img));
+
+// ════════════════════════════════════════════════════════════════════
+// AI EVENT CHATBOT
+// ════════════════════════════════════════════════════════════════════
+</script>
+
+<!-- ══ AI Event Chatbot ══ -->
+
+  <script src="chatbot.js"></script>
+</body>
+</html>

@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About – EventSphere</title>
+  <link rel="manifest" href="manifest.json"/>
+  <meta name="theme-color" content="#F5A623"/>
+  <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});</script>
+  <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --orange: #F5A623;
+      --orange-dark: #E09400;
+      --orange-light: #FFF3DC;
+      --text-dark: #1A1A2E;
+      --text-mid: #555;
+      --text-light: #888;
+      --bg-white: #FFFFFF;
+      --bg-light: #F9F9F9;
+      --border: #E8E8E8;
+      --shadow: 0 4px 24px rgba(0,0,0,0.07);
+      --shadow-card: 0 8px 40px rgba(0,0,0,0.08);
+      --radius: 20px;
+      --radius-sm: 12px;
+      --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
+    }
+    [data-theme="dark"] {
+      --text-dark: #F0F0F0; --text-mid: #CCCCCC; --text-light: #999;
+      --bg-white: #121212; --bg-light: #1A1A1A; --border: #2A2A2A;
+      --shadow: 0 4px 24px rgba(0,0,0,0.4); --shadow-card: 0 8px 40px rgba(0,0,0,0.5);
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg-white); color: var(--text-dark);
+      transition: background var(--transition), color var(--transition);
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--bg-white); border-bottom: 1px solid var(--border);
+      padding: 0 48px; height: 64px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .nav-logo { display:flex; align-items:center; gap:8px; text-decoration:none; font-family:'Clash Display',sans-serif; font-weight:700; font-size:20px; color:var(--text-dark); }
+    .nav-logo svg { color:var(--orange); }
+    .nav-links { display:flex; align-items:center; gap:36px; list-style:none; }
+    .nav-links a { text-decoration:none; font-size:14.5px; font-weight:500; color:var(--text-mid); transition:color var(--transition); }
+    .nav-links a.active { color:var(--orange); font-weight:600; }
+    .nav-links a:hover { color:var(--orange); }
+    .nav-right { display:flex; align-items:center; gap:16px; }
+    .dark-toggle { background:none; border:none; cursor:pointer; color:var(--text-mid); padding:6px; border-radius:50%; display:flex; align-items:center; transition:color var(--transition); }
+    .dark-toggle:hover { color:var(--orange); }
+    .btn-login { background:none; border:none; cursor:pointer; font-size:14.5px; font-weight:500; color:var(--text-dark); font-family:'Plus Jakarta Sans',sans-serif; transition:color var(--transition); }
+    .btn-login:hover { color:var(--orange); }
+    .btn-signup { background:var(--orange); color:#fff; border:none; border-radius:12px; padding:9px 22px; font-size:14px; font-weight:600; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif; box-shadow:0 4px 16px rgba(245,166,35,0.3); transition:background var(--transition),transform var(--transition); }
+    .btn-signup:hover { background:var(--orange-dark); transform:translateY(-1px); }
+
+    /* ── HERO ── */
+    .hero {
+      background: var(--orange);
+      padding: 80px 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content:'';
+      position:absolute; top:-80px; left:-100px;
+      width:350px; height:350px;
+      background: rgba(255,255,255,0.08);
+      border-radius:50%;
+      pointer-events:none;
+    }
+    .hero::after {
+      content:'';
+      position:absolute; bottom:-60px; right:-80px;
+      width:300px; height:300px;
+      background: rgba(255,255,255,0.06);
+      border-radius:50%;
+      pointer-events:none;
+    }
+    .hero h1 {
+      font-family: 'Clash Display', sans-serif;
+      font-size: clamp(36px, 5vw, 56px);
+      font-weight: 700; color: #fff;
+      line-height: 1.15; letter-spacing: -1px;
+      margin-bottom: 20px;
+      position: relative; z-index: 1;
+      animation: fadeUp 0.7s ease both;
+    }
+    .hero p {
+      font-size: 17px; color: rgba(255,255,255,0.88);
+      line-height: 1.75; max-width: 640px;
+      margin: 0 auto;
+      position: relative; z-index: 1;
+      animation: fadeUp 0.7s 0.1s ease both;
+    }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ── PILLARS ── */
+    .pillars {
+      padding: 80px 48px;
+      background: var(--bg-white);
+      transition: background var(--transition);
+    }
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px;
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .pillar { animation: fadeUp 0.6s ease both; }
+    .pillar:nth-child(1) { animation-delay: 0.1s; }
+    .pillar:nth-child(2) { animation-delay: 0.2s; }
+    .pillar:nth-child(3) { animation-delay: 0.3s; }
+
+    .pillar-icon {
+      width: 68px; height: 68px;
+      background: #FDE8CC;
+      border-radius: 18px;
+      display: inline-flex; align-items: center; justify-content: center;
+      margin-bottom: 20px;
+      transition: transform var(--transition);
+    }
+    .pillar:hover .pillar-icon { transform: translateY(-4px); }
+    .pillar-icon svg { color: var(--orange); }
+
+    .pillar h3 {
+      font-family: 'Clash Display', sans-serif;
+      font-size: 18px; font-weight: 700;
+      color: var(--text-dark); margin-bottom: 12px;
+    }
+    .pillar p { font-size: 14.5px; color: var(--text-mid); line-height: 1.7; }
+
+    /* ── SECURITY SECTION ── */
+    .security {
+      padding: 0 48px 72px;
+      background: var(--bg-white);
+      transition: background var(--transition);
+    }
+    .security-card {
+      background: #EEF0F8;
+      border-radius: var(--radius);
+      padding: 56px 48px;
+      text-align: center;
+      transition: background var(--transition);
+    }
+    [data-theme="dark"] .security-card { background: #1C1F2E; }
+
+    .security-title {
+      display: flex; align-items: center; justify-content: center;
+      gap: 12px; margin-bottom: 14px;
+    }
+    .security-title h2 {
+      font-family: 'Clash Display', sans-serif;
+      font-size: 28px; font-weight: 700;
+      color: var(--text-dark);
+    }
+    .security-subtitle {
+      font-size: 15px; color: var(--text-mid);
+      max-width: 560px; margin: 0 auto 40px; line-height: 1.7;
+    }
+
+    .security-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+    .security-item {
+      background: var(--bg-white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-align: left;
+      font-size: 14px;
+      color: var(--text-mid);
+      font-weight: 500;
+      transition: background var(--transition), border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+    }
+    .security-item:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: rgba(245,166,35,0.3); }
+    [data-theme="dark"] .security-item { background: #252836; border-color: #333; }
+
+    .check-icon {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: #E8F8EE; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .check-icon svg { color: #27AE60; }
+    [data-theme="dark"] .check-icon { background: rgba(39,174,96,0.15); }
+
+    /* ── FUTURE CARD ── */
+    .future {
+      padding: 0 48px 80px;
+      background: var(--bg-white);
+      transition: background var(--transition);
+    }
+    .future-card {
+      background: var(--bg-white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 52px 56px;
+      text-align: center;
+      box-shadow: var(--shadow-card);
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .future-card h2 {
+      font-family: 'Clash Display', sans-serif;
+      font-size: 30px; font-weight: 700;
+      color: var(--text-dark); margin-bottom: 20px;
+    }
+    .future-card p {
+      font-size: 15.5px; color: var(--text-mid);
+      line-height: 1.8; max-width: 680px;
+      margin: 0 auto 36px;
+    }
+    .future-divider {
+      border: none; border-top: 1px solid var(--border);
+      margin-bottom: 36px;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+    .stat { text-align: center; }
+    .stat-num {
+      font-family: 'Clash Display', sans-serif;
+      font-size: 34px; font-weight: 700;
+      color: var(--orange); margin-bottom: 6px;
+      letter-spacing: -0.5px;
+    }
+    .stat-label {
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 1.2px; text-transform: uppercase;
+      color: var(--text-light);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--bg-white); border-top: 1px solid var(--border);
+      padding: 24px 48px; display: flex; align-items: center; justify-content: space-between;
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .footer-logo { display:flex; align-items:center; gap:8px; font-family:'Clash Display',sans-serif; font-weight:700; font-size:17px; color:var(--text-dark); text-decoration:none; }
+    .footer-logo svg { color:var(--orange); }
+    .footer-copy { font-size:13.5px; color:var(--text-light); }
+    .footer-links { display:flex; gap:24px; }
+    .footer-links a { font-size:13.5px; color:var(--text-mid); text-decoration:none; transition:color var(--transition); }
+    .footer-links a:hover { color:var(--orange); }
+
+    @media (max-width:900px) {
+      .pillars-grid { grid-template-columns:1fr; gap:32px; }
+      .security-grid { grid-template-columns:1fr; }
+      .stats-grid { grid-template-columns:repeat(2,1fr); }
+    }
+    @media (max-width:600px) {
+      nav{padding:0 20px;} .nav-links{display:none;}
+      .hero,.pillars,.security,.future{padding-left:20px;padding-right:20px;}
+      .future-card{padding:32px 24px;}
+      .stats-grid{grid-template-columns:repeat(2,1fr);}
+      footer{flex-direction:column;gap:12px;text-align:center;padding:20px;}
+    }
+  
+    /* ── SCROLL TO TOP BUTTON ── */
+    #scrollTopBtn{position:fixed;bottom:150px;right:24px;width:44px;height:44px;background:var(--orange,#F5A623);color:#fff;border:none;border-radius:50%;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(245,166,35,0.4);z-index:500;transition:all 0.3s;font-size:18px;}
+    #scrollTopBtn:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(245,166,35,0.5);}
+    #scrollTopBtn.show{display:flex;}
+
+    /* ── MOBILE HAMBURGER ── */
+    .hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:6px;}
+    .hamburger span{display:block;width:22px;height:2px;background:var(--text-dark,#1A1A2E);border-radius:2px;transition:all 0.3s;}
+    .mobile-menu{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;}
+    .mobile-menu.open{display:block;}
+    .mobile-menu-inner{position:absolute;right:0;top:0;bottom:0;width:260px;background:var(--bg-white,#fff);padding:24px;display:flex;flex-direction:column;gap:0;box-shadow:-4px 0 24px rgba(0,0,0,0.15);}
+    .mobile-menu-inner .close-btn{align-self:flex-end;background:none;border:none;font-size:22px;cursor:pointer;color:var(--text-dark,#1A1A2E);margin-bottom:16px;}
+    .mobile-menu-inner a,.mobile-menu-inner button{display:block;padding:14px 0;font-size:16px;font-weight:600;color:var(--text-dark,#1A1A2E);text-decoration:none;border-bottom:1px solid var(--border,#E8E8E8);background:none;border-top:none;border-left:none;border-right:none;text-align:left;cursor:pointer;font-family:inherit;}
+    .mobile-menu-inner a:hover{color:var(--orange,#F5A623);}
+    @media(max-width:768px){.hamburger{display:flex;}.nav-links{display:none !important;}.nav-right .btn-login,.nav-right .btn-signup{display:none;}}
+    
+    /* ── GLOBAL SMOOTH ── */
+    html { scroll-behavior: smooth; }
+    * { -webkit-tap-highlight-color: transparent; }
+
+    /* ── PAGE TRANSITION ── */
+    body { animation: pageIn 0.35s ease both; }
+    @keyframes pageIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="index.html" class="nav-logo">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      EventSphere
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="events.html">Events</a></li>
+      <li><a href="about.html" class="active">About</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="dark-toggle" id="darkToggle">
+        <svg id="darkIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="btn-login" onclick="window.location.href='login.html'">Login</button>
+      <button class="btn-signup" onclick="window.location.href='signup.html'">Sign up</button>
+    </div>
+  </nav>
+
+<!-- Scroll to Top Button -->
+<button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top">↑</button>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu" onclick="closeMobileMenu(event)">
+  <div class="mobile-menu-inner">
+    <button class="close-btn" onclick="document.getElementById('mobileMenu').classList.remove('open')">✕</button>
+    <a href="index.html">🏠 Home</a>
+    <a href="events.html">📅 Events</a>
+    <a href="about.html">ℹ️ About</a>
+    <a href="contact.html">📬 Contact</a>
+    <a href="dashboard.html" id="mobileDbLink" style="display:none">📊 Dashboard</a>
+    <a href="admin.html" id="mobileAdminLink" style="display:none;color:var(--orange,#F5A623)">🛡️ Admin</a>
+    <button onclick="doNavLogout()" id="mobileLogoutBtn" style="display:none;color:#dc3545;padding:14px 0;font-size:16px;font-weight:600;font-family:inherit;background:none;border:none;border-bottom:1px solid var(--border,#E8E8E8);text-align:left;cursor:pointer;">⬡ Logout</button>
+    <a href="login.html" id="mobileLoginLink">🔐 Login</a>
+    <a href="signup.html" id="mobileSignupLink" style="color:var(--orange,#F5A623)">✍️ Sign Up</a>
+  </div>
+</div>
+
+
+  <!-- HERO -->
+  <section class="hero">
+    <h1>Connecting Passions,<br>Empowering Communities</h1>
+    <p>EventSphere is India's leading platform for college students and professionals to discover, register, and experience world-class technical, cultural, and sports events.</p>
+  </section>
+
+  <!-- PILLARS -->
+  <section class="pillars">
+    <div class="pillars-grid">
+      <div class="pillar">
+        <div class="pillar-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <h3>Our Mission</h3>
+        <p>To make event discovery seamless and ensure no talent misses out on life-changing opportunities due to a lack of awareness.</p>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h3>Our Community</h3>
+        <p>We connect thousands of students across top colleges in Pune, Mumbai, Bangalore, Nagpur, and Delhi with premier event organizers.</p>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <h3>Our Impact</h3>
+        <p>From massive hackathons to national debate championships, EventSphere has facilitated over 100,000+ seamless event registrations.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECURITY & DATA VALIDATION -->
+  <section class="security">
+    <div class="security-card">
+      <div class="security-title">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <h2>Security &amp; Data Validation</h2>
+      </div>
+      <p class="security-subtitle">Your safety is our priority. EventSphere implements industry-standard validation and security measures.</p>
+      <div class="security-grid">
+        <div class="security-item">
+          <div class="check-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          Advanced email format validation
+        </div>
+        <div class="security-item">
+          <div class="check-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          Strong password requirements (8+ chars, uppercase, lowercase, numbers, special characters)
+        </div>
+        <div class="security-item">
+          <div class="check-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          Full name validation with character restrictions
+        </div>
+        <div class="security-item">
+          <div class="check-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          Input sanitization to prevent malicious data
+        </div>
+        <div class="security-item">
+          <div class="check-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          Real-time password strength indicator
+        </div>
+        <div class="security-item">
+          <div class="check-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          Comprehensive feedback validation
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BUILT FOR THE FUTURE -->
+  <section class="future">
+    <div class="future-card">
+      <h2>Built For The Future</h2>
+      <p>Founded in 2024, EventSphere started as a small college project to solve a simple problem: finding out what's happening on campus. Today, it has grown into a robust, full-stack event management platform powering events across multiple metropolises. Our technology ensures a smooth registration process, real-time analytics for organizers, personalized event recommendations, comprehensive feedback system, and enterprise-grade data validation.</p>
+      <hr class="future-divider"/>
+      <div class="stats-grid">
+        <div class="stat">
+          <div class="stat-num">5+</div>
+          <div class="stat-label">Cities</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">35+</div>
+          <div class="stat-label">Major Events</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">10k+</div>
+          <div class="stat-label">Users</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">24/7</div>
+          <div class="stat-label">Support</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <a href="index.html" class="footer-logo">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      EventSphere
+    </a>
+    <p class="footer-copy">© 2026 EventSphere. All rights reserved.</p>
+    <div class="footer-links">
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </footer>
+
+  <script>
+    const toggle = document.getElementById('darkToggle');
+    const icon   = document.getElementById('darkIcon');
+    const html   = document.documentElement;
+    const sunSVG  = `<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>`;
+    const moonSVG = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
+    if (localStorage.getItem('theme') === 'dark') { html.setAttribute('data-theme','dark'); icon.innerHTML = sunSVG; }
+    toggle.addEventListener('click', () => {
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      if (isDark) { html.removeAttribute('data-theme'); icon.innerHTML = moonSVG; localStorage.setItem('theme','light'); }
+      else { html.setAttribute('data-theme','dark'); icon.innerHTML = sunSVG; localStorage.setItem('theme','dark'); }
+    });
+
+    // Animate stats on scroll
+    const stats = document.querySelectorAll('.stat-num');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.animation = 'fadeUp 0.6s ease both';
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.3 });
+    stats.forEach(s => observer.observe(s));
+  
+    // ── Update nav for logged-in user ──────────────────────
+    (function updateNav() {
+      const user = JSON.parse(localStorage.getItem('user') || 'null');
+      if (!user || !user.name) return;
+
+      const navRight = document.querySelector('.nav-right');
+      if (!navRight) return;
+
+      // Build logged-in nav
+      const sunSVGn = `<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>`;
+      const moonSVGn = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
+      const isDarkNow = document.documentElement.getAttribute('data-theme') === 'dark';
+
+      navRight.innerHTML = `
+        <button class="dark-toggle" id="darkToggle2" title="Toggle dark mode">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${isDarkNow ? sunSVGn : moonSVGn}</svg>
+        </button>
+        <div style="display:flex;align-items:center;gap:6px;font-size:14px;font-weight:500;color:var(--text-dark)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--orange,#F5A623)" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span>${user.name}</span>
+        </div>
+        <button onclick="doNavLogout()" style="background:none;border:none;cursor:pointer;font-size:13.5px;font-weight:600;color:#dc3545;font-family:inherit;display:flex;align-items:center;gap:5px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Logout
+        </button>`;
+
+      // Re-attach dark toggle
+      const dt2 = document.getElementById('darkToggle2');
+      if (dt2) {
+        dt2.addEventListener('click', () => {
+          const html = document.documentElement;
+          const dark = html.getAttribute('data-theme') === 'dark';
+          const icon = dt2.querySelector('svg');
+          if (dark) { html.removeAttribute('data-theme'); icon.innerHTML = moonSVGn; localStorage.setItem('theme','light'); }
+          else { html.setAttribute('data-theme','dark'); icon.innerHTML = sunSVGn; localStorage.setItem('theme','dark'); }
+        });
+      }
+
+      // Add Dashboard link
+      const navLinks = document.querySelector('.nav-links');
+      if (navLinks && !navLinks.querySelector('a[href="dashboard.html"]')) {
+        const li = document.createElement('li');
+        li.innerHTML = '<a href="dashboard.html">Dashboard</a>';
+        navLinks.appendChild(li);
+      }
+      // Add Admin link if admin
+      if (navLinks && user.role === 'admin' && !navLinks.querySelector('a[href="admin.html"]')) {
+        const la = document.createElement('li');
+        la.innerHTML = '<a href="admin.html" style="color:var(--orange,#F5A623);font-weight:700">Admin</a>';
+        navLinks.appendChild(la);
+      }
+    })();
+
+    function doNavLogout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = 'index.html';
+    }
+
+    // ── Scroll to Top ──────────────────────────────────────
+    window.addEventListener('scroll', () => {
+      const btn = document.getElementById('scrollTopBtn');
+      if(btn) btn.classList.toggle('show', window.scrollY > 300);
+    });
+
+    // ── Mobile Menu ────────────────────────────────────────
+    function openMobileMenu() {
+      document.getElementById('mobileMenu').classList.add('open');
+    }
+    function closeMobileMenu(e) {
+      if(e.target === document.getElementById('mobileMenu'))
+        document.getElementById('mobileMenu').classList.remove('open');
+    }
+    // Update mobile menu based on login state
+    (function() {
+      const u = JSON.parse(localStorage.getItem('user')||'null');
+      if(u && u.name) {
+        const dbLink = document.getElementById('mobileDbLink');
+        const logoutBtn = document.getElementById('mobileLogoutBtn');
+        const loginLink = document.getElementById('mobileLoginLink');
+        const signupLink = document.getElementById('mobileSignupLink');
+        const adminLink = document.getElementById('mobileAdminLink');
+        if(dbLink) dbLink.style.display='block';
+        if(logoutBtn) logoutBtn.style.display='block';
+        if(loginLink) loginLink.style.display='none';
+        if(signupLink) signupLink.style.display='none';
+        if(adminLink && u.role==='admin') adminLink.style.display='block';
+      }
+    })();
+
+  </script>
+</body>
+</html>
